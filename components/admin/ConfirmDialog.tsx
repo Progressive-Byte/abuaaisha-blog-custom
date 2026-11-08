@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useId, useRef } from "react";
+import { Icon } from "@/components/Icon";
 
 interface Props {
   open: boolean;
@@ -28,6 +29,8 @@ export function ConfirmDialog({
   children,
 }: Props) {
   const ref = useRef<HTMLDialogElement>(null);
+  const titleId = useId();
+  const descriptionId = useId();
 
   useEffect(() => {
     const dialog = ref.current;
@@ -40,13 +43,20 @@ export function ConfirmDialog({
     <dialog
       ref={ref}
       className="a-modal"
+      aria-labelledby={titleId}
+      aria-describedby={description ? descriptionId : undefined}
       onCancel={(event) => {
         event.preventDefault();
         onCancel();
       }}
     >
-      <h2>{title}</h2>
-      {description ? <p>{description}</p> : null}
+      <div className="a-modal-head">
+        <h2 id={titleId}>{title}</h2>
+        <button className="a-modal-close" type="button" aria-label="Close dialog" onClick={onCancel} disabled={loading}>
+          <Icon name="close" size={20} />
+        </button>
+      </div>
+      {description ? <p id={descriptionId}>{description}</p> : null}
       {children}
       <div className="a-modal-actions">
         <button className="a-btn a-btn-outline" type="button" onClick={onCancel} disabled={loading}>

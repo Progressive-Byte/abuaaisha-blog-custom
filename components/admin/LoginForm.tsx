@@ -2,12 +2,14 @@
 
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
+import { Icon } from "@/components/Icon";
 import { api, ApiError } from "@/lib/api-client";
 
 export function LoginForm({ next }: { next?: string }) {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -28,9 +30,10 @@ export function LoginForm({ next }: { next?: string }) {
   return (
     <form className="a-stack" onSubmit={onSubmit}>
       {error ? (
-        <p className="a-banner a-banner-error" role="alert">
-          {error}
-        </p>
+        <div className="a-banner a-banner-error" role="alert">
+          <Icon name="alert-circle" size={18} />
+          <span>{error}</span>
+        </div>
       ) : null}
 
       <div className="a-field">
@@ -40,23 +43,37 @@ export function LoginForm({ next }: { next?: string }) {
           className="a-input"
           type="email"
           autoComplete="username"
+          placeholder="you@example.com"
           value={email}
           onChange={(event) => setEmail(event.target.value)}
           required
+          autoFocus
         />
       </div>
 
       <div className="a-field">
         <label htmlFor="admin-password">Password</label>
-        <input
-          id="admin-password"
-          className="a-input"
-          type="password"
-          autoComplete="current-password"
-          value={password}
-          onChange={(event) => setPassword(event.target.value)}
-          required
-        />
+        <div className="a-input-wrap">
+          <input
+            id="admin-password"
+            className="a-input"
+            type={showPassword ? "text" : "password"}
+            autoComplete="current-password"
+            placeholder="Enter your password"
+            value={password}
+            onChange={(event) => setPassword(event.target.value)}
+            required
+          />
+          <button
+            className="a-input-action"
+            type="button"
+            onClick={() => setShowPassword((value) => !value)}
+            aria-label={showPassword ? "Hide password" : "Show password"}
+            aria-pressed={showPassword}
+          >
+            <Icon name={showPassword ? "eye-off" : "eye"} size={18} />
+          </button>
+        </div>
       </div>
 
       <button className="a-btn" type="submit" disabled={loading}>

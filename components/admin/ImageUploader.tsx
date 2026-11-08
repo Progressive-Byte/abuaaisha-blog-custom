@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, type ChangeEvent } from "react";
+import { Icon } from "@/components/Icon";
 import { api, ApiError } from "@/lib/api-client";
 import type { AdminPostImage } from "@/lib/admin-types";
 
@@ -96,44 +97,47 @@ export function ImageUploader({ value, onChange }: Props) {
       {value ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img className="a-cover" src={value.url} alt={value.alt || "Cover preview"} />
-      ) : (
-        <div className="a-cover-empty">No cover image</div>
-      )}
+      ) : null}
 
-      <div className="a-field">
-        <label htmlFor="cover-file">Upload cover</label>
-        <input
-          id="cover-file"
-          className="a-input"
-          type="file"
-          accept={ALLOWED.join(",")}
-          onChange={onFile}
-          disabled={uploading}
-        />
-        <small>JPEG, PNG, WebP or AVIF · up to 8 MB · resized to 1600px on Cloudinary.</small>
-      </div>
+      <label className={`a-upload ${value ? "" : "a-upload-empty"} ${uploading ? "is-busy" : ""}`} aria-busy={uploading}>
+        <input type="file" accept={ALLOWED.join(",")} onChange={onFile} disabled={uploading} aria-label="Upload cover image" />
+        {uploading ? <span className="a-spinner a-spinner-dark" aria-hidden="true" /> : <Icon name="image" size={value ? 20 : 24} />}
+        <strong>{uploading ? "Uploading…" : value ? "Replace cover" : "Upload cover image"}</strong>
+        <span>JPEG, PNG, WebP or AVIF · max 8 MB</span>
+      </label>
 
       {value ? (
         <div className="a-field">
-          <label htmlFor="cover-alt">Alt text (required)</label>
+          <label htmlFor="cover-alt">
+            Alt text <span className="a-req">*</span>
+          </label>
           <input
             id="cover-alt"
             className="a-input"
             value={value.alt}
             onChange={(event) => onChange({ ...value, alt: event.target.value })}
             maxLength={500}
+            placeholder="Describe the image for screen readers"
           />
-          <button className="a-btn a-btn-outline a-btn-sm" type="button" onClick={remove}>
-            Remove image
-          </button>
+          <div>
+            <button className="a-btn a-btn-outline a-btn-sm" type="button" onClick={remove}>
+              <Icon name="trash" size={15} />
+              Remove image
+            </button>
+          </div>
         </div>
       ) : null}
 
-      {uploading ? <p className="a-banner a-banner-info">Uploading to Cloudinary…</p> : null}
-      {error ? (
-        <p className="a-banner a-banner-error" role="alert">
-          {error}
+      {uploading ? (
+        <p className="a-muted" aria-live="polite">
+          Uploading to Cloudinary…
         </p>
+      ) : null}
+      {error ? (
+        <div className="a-banner a-banner-error" role="alert">
+          <Icon name="alert-circle" size={18} />
+          <span>{error}</span>
+        </div>
       ) : null}
     </div>
   );

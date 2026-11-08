@@ -3,6 +3,7 @@ import { Resend } from "resend";
 export interface ContactEmail {
   name: string;
   email: string;
+  phone?: string;
   subject: string;
   message: string;
 }
@@ -40,6 +41,7 @@ export async function sendContactEmail(contact: ContactEmail): Promise<"sent" | 
     "",
     `নাম: ${contact.name}`,
     `ইমেইল: ${contact.email}`,
+    contact.phone ? `ফোন: ${contact.phone}` : "",
     `বিষয়: ${contact.subject}`,
     sessionName ? `সেশন: ${sessionName}` : "",
     `সময়: ${receivedAt}`,
@@ -56,8 +58,9 @@ export async function sendContactEmail(contact: ContactEmail): Promise<"sent" | 
   const rows: Array<[string, string]> = [
     ["নাম", contact.name],
     ["ইমেইল", contact.email],
-    ["বিষয়", contact.subject],
   ];
+  if (contact.phone) rows.push(["ফোন", contact.phone]);
+  rows.push(["বিষয়", contact.subject]);
   if (sessionName) rows.push(["সেশন", sessionName]);
   rows.push(["সময়", receivedAt]);
 
@@ -69,7 +72,9 @@ export async function sendContactEmail(contact: ContactEmail): Promise<"sent" | 
           <td style="padding:10px 0;border-top:${index === 0 ? "none" : "1px solid #eceae3"};font-size:15px;color:#1f2933;font-weight:600;">${
             label === "ইমেইল"
               ? `<a href="mailto:${escapeHtml(value)}" style="color:#0f6b47;text-decoration:none;">${escapeHtml(value)}</a>`
-              : escapeHtml(value)
+              : label === "ফোন"
+                ? `<a href="tel:${escapeHtml(value.replace(/[^\d+]/g, ""))}" style="color:#0f6b47;text-decoration:none;">${escapeHtml(value)}</a>`
+                : escapeHtml(value)
           }</td>
         </tr>`,
     )

@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState, type FormEvent } from "react";
+import { useEffect, useId, useRef, useState, type FormEvent } from "react";
+import { Icon } from "@/components/Icon";
 import { api, ApiError } from "@/lib/api-client";
 import type { AiDraft } from "@/lib/admin-types";
 import { CATEGORIES_LABEL } from "@/lib/admin-constants";
@@ -13,6 +14,9 @@ interface Props {
 
 export function AiDraftDialog({ open, onClose, onApply }: Props) {
   const ref = useRef<HTMLDialogElement>(null);
+  const topicRef = useRef<HTMLTextAreaElement>(null);
+  const titleId = useId();
+  const descriptionId = useId();
   const [topic, setTopic] = useState("");
   const [audience, setAudience] = useState("");
   const [lead, setLead] = useState("social");
@@ -26,7 +30,10 @@ export function AiDraftDialog({ open, onClose, onApply }: Props) {
   useEffect(() => {
     const dialog = ref.current;
     if (!dialog) return;
-    if (open && !dialog.open) dialog.showModal();
+    if (open && !dialog.open) {
+      dialog.showModal();
+      window.setTimeout(() => topicRef.current?.focus(), 0);
+    }
     if (!open && dialog.open) dialog.close();
   }, [open]);
 
@@ -52,22 +59,32 @@ export function AiDraftDialog({ open, onClose, onApply }: Props) {
     <dialog
       ref={ref}
       className="a-modal"
+      aria-labelledby={titleId}
+      aria-describedby={descriptionId}
       onCancel={(event) => {
         event.preventDefault();
         if (!loading) onClose();
       }}
     >
-      <h2>Generate a draft with AI</h2>
-      <p>
+      <div className="a-modal-head">
+        <h2 id={titleId}>Generate a draft with AI</h2>
+        <button className="a-modal-close" type="button" aria-label="Close dialog" onClick={onClose} disabled={loading}>
+          <Icon name="close" size={20} />
+        </button>
+      </div>
+      <p id={descriptionId}>
         The result is inserted into the editor as an editable draft. It is never published automatically — review and edit
         everything first.
       </p>
 
       <form className="a-stack" onSubmit={onSubmit}>
         <div className="a-field">
-          <label htmlFor="ai-topic">Topic or prompt</label>
+          <label htmlFor="ai-topic">
+            Topic or prompt <span className="a-req">*</span>
+          </label>
           <textarea
             id="ai-topic"
+            ref={topicRef}
             className="a-textarea"
             rows={3}
             minLength={5}
@@ -75,6 +92,7 @@ export function AiDraftDialog({ open, onClose, onApply }: Props) {
             value={topic}
             onChange={(event) => setTopic(event.target.value)}
             required
+            placeholder="What should the post be about?"
           />
         </div>
 
@@ -153,9 +171,10 @@ export function AiDraftDialog({ open, onClose, onApply }: Props) {
         </div>
 
         {error ? (
-          <p className="a-banner a-banner-error" role="alert">
-            {error}
-          </p>
+          <div className="a-banner a-banner-error" role="alert">
+            <Icon name="alert-circle" size={18} />
+            <span>{error}</span>
+          </div>
         ) : null}
 
         <div className="a-modal-actions">

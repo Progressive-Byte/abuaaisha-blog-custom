@@ -46,6 +46,17 @@ export function readingTimeLabel(markdown: string): string {
   return `${toBanglaDigits(readingMinutes(markdown))} মিনিটের পড়া`;
 }
 
+const adminDate = new Intl.DateTimeFormat("en-GB", {
+  day: "2-digit",
+  month: "short",
+  year: "numeric",
+  timeZone: "UTC",
+});
+
+export function formatAdminDate(date: Date): string {
+  return adminDate.format(date);
+}
+
 export function formatIsoDate(date: Date): string {
   return date.toISOString().slice(0, 10);
 }

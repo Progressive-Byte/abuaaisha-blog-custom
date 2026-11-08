@@ -9,7 +9,18 @@ export type Language = (typeof LANGUAGES)[number];
 export const POST_STATUSES = ["draft", "published"] as const;
 export type PostStatus = (typeof POST_STATUSES)[number];
 
-export const POST_SLUG_PATTERN = /^\d{3}[fsw]\d{2,}$/;
+export const SLUG_PATTERN = /^[\p{L}\p{M}\p{N}]+(?:-[\p{L}\p{M}\p{N}]+)*$/u;
+
+/** Builds a URL-safe slug from a title. Bengali text is preserved (URL-encoded on output). */
+export function slugifyTitle(value: string): string {
+  return value
+    .normalize("NFKC")
+    .toLowerCase()
+    .replace(/[^\p{L}\p{M}\p{N}]+/gu, "-")
+    .replace(/^-+/, "")
+    .slice(0, 80)
+    .replace(/-+$/, "");
+}
 
 export const postSchema = z
   .object({
@@ -45,7 +56,9 @@ export const sourceSchema = z.object({
 export const slugSchema = z
   .string()
   .trim()
-  .regex(POST_SLUG_PATTERN, "Slug must look like 033s22 (3 digits, f/s/w, then 2+ digits)");
+  .min(1, "Slug is required")
+  .max(120, "Slug must be at most 120 characters")
+  .regex(SLUG_PATTERN, "Use letters, numbers and single hyphens (e.g. my-post-title)");
 
 export const postInputSchema = z
   .object({

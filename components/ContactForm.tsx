@@ -25,6 +25,7 @@ export function ContactForm({ idPrefix }: { idPrefix: string }) {
         body: JSON.stringify({
           name: data.get("name"),
           email: data.get("email"),
+          phone: data.get("phone"),
           subject: data.get("subject"),
           message: data.get("message"),
           botField: data.get("bot-field"),
@@ -73,6 +74,23 @@ export function ContactForm({ idPrefix }: { idPrefix: string }) {
               suppressHydrationWarning
             />
           </div>
+        </div>
+      </div>
+
+      <div className={styles.field}>
+        <label htmlFor={id("phone")}>
+          ফোন নম্বর <span className={styles.optional}>(ঐচ্ছিক)</span>
+        </label>
+        <div className={styles.input}>
+          <Icon name="phone" size={20} />
+          <input
+            id={id("phone")}
+            name="phone"
+            type="tel"
+            placeholder="+880 1XXX-XXXXXX"
+            autoComplete="tel"
+            inputMode="tel"
+          />
         </div>
       </div>
 

@@ -9,7 +9,7 @@ import { Icon } from "@/components/Icon";
 import { api, ApiError } from "@/lib/api-client";
 import type { AdminCategory, AdminPost, AdminPostImage, AdminPostSource, AiDraft, PostStatus } from "@/lib/admin-types";
 import { CATEGORIES_LABEL } from "@/lib/admin-constants";
-import { POST_SLUG_PATTERN } from "@/lib/post-schema";
+import { SLUG_PATTERN, slugifyTitle } from "@/lib/post-schema";
 
 interface FormState {
   title: string;
@@ -23,6 +23,11 @@ interface FormState {
   image: AdminPostImage | null;
   sources: AdminPostSource[];
   aiGenerated: boolean;
+}
+
+interface FieldIssue {
+  field: string;
+  message: string;
 }
 
 function fromPost(post?: AdminPost): FormState {
@@ -71,10 +76,14 @@ export function PostForm({ mode, initial }: { mode: "new" | "edit"; initial?: Ad
   const [savedDraft, setSavedDraft] = useState<SavedDraft | null>(null);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const [issue, setIssue] = useState<FieldIssue | null>(null);
   const [toast, setToast] = useState<{ text: string; error?: boolean } | null>(null);
   const [aiOpen, setAiOpen] = useState(false);
+  const [pendingDraft, setPendingDraft] = useState<AiDraft | null>(null);
   const [publishOpen, setPublishOpen] = useState(false);
+  const [unpublishOpen, setUnpublishOpen] = useState(false);
   const [status, setStatus] = useState<PostStatus>(initial?.status ?? "draft");
+  const [slugAuto, setSlugAuto] = useState(!initial);
   const dirtyRef = useRef(false);
 
   useEffect(() => {
@@ -127,6 +136,28 @@ export function PostForm({ mode, initial }: { mode: "new" | "edit"; initial?: Ad
     setForm((current) => ({ ...current, ...patch }));
     setDirty(true);
     dirtyRef.current = true;
+    setIssue(null);
+  }
+
+  function onTitleChange(value: string) {
+    setForm((current) => {
+      const next = { ...current, title: value };
+      if (slugAuto) next.slug = slugifyTitle(value);
+      return next;
+    });
+    setDirty(true);
+    dirtyRef.current = true;
+    setIssue(null);
+  }
+
+  function onSlugChange(value: string) {
+    setSlugAuto(false);
+    update({ slug: value.toLowerCase().replace(/\s+/g, "-") });
+  }
+
+  function generateSlug() {
+    setSlugAuto(true);
+    update({ slug: slugifyTitle(form.title) });
   }
 
   function restore() {
@@ -134,6 +165,7 @@ export function PostForm({ mode, initial }: { mode: "new" | "edit"; initial?: Ad
     setForm(savedDraft.form);
     setStatus(initial?.status ?? "draft");
     setSavedDraft(null);
+    setSlugAuto(false);
     setDirty(true);
     dirtyRef.current = true;
     setToast({ text: "Unsaved changes restored." });
@@ -166,27 +198,35 @@ export function PostForm({ mode, initial }: { mode: "new" | "edit"; initial?: Ad
     update({ sources: form.sources.filter((_, i) => i !== index) });
   }
 
-  function validate(): string {
-    if (!form.title.trim()) return "Title is required.";
-    if (!POST_SLUG_PATTERN.test(form.slug.trim())) return "Slug must look like 033s22 (3 digits, f/s/w, then 2+ digits).";
-    if (!form.summary.trim()) return "Summary is required.";
-    if (!form.body.trim()) return "Body is required.";
-    if (form.categories.length === 0) return "Choose at least one category.";
-    if (form.image && !form.image.alt.trim()) return "Alt text is required when a cover image is set.";
-    if (!form.publishedAt) return "Publish date is required.";
-    return "";
+  function validate(): FieldIssue | null {
+    if (!form.title.trim()) return { field: "post-title", message: "Title is required." };
+    if (!SLUG_PATTERN.test(form.slug.trim()))
+      return { field: "post-slug", message: "Use letters, numbers and single hyphens (e.g. my-post-title)." };
+    if (!form.summary.trim()) return { field: "post-summary", message: "Summary is required." };
+    if (!form.body.trim()) return { field: "post-body", message: "Body is required." };
+    if (form.categories.length === 0) return { field: "post-categories", message: "Choose at least one category." };
+    if (form.image && !form.image.alt.trim())
+      return { field: "cover-alt", message: "Alt text is required when a cover image is set." };
+    if (!form.publishedAt) return { field: "post-date", message: "Publish date is required." };
+    return null;
+  }
+
+  function showIssue(problem: FieldIssue) {
+    setIssue(problem);
+    setError(problem.message);
+    window.requestAnimationFrame(() => document.getElementById(problem.field)?.focus());
   }
 
   async function persist(options: { status: PostStatus; silent?: boolean }): Promise<AdminPost | null> {
     const problem = validate();
     if (problem) {
-      setError(problem);
-      setToast({ text: problem, error: true });
+      showIssue(problem);
       return null;
     }
 
     setSaving(true);
     setError("");
+    setIssue(null);
     const payload = {
       ...form,
       status: options.status,
@@ -233,9 +273,13 @@ export function PostForm({ mode, initial }: { mode: "new" | "edit"; initial?: Ad
 
   function applyDraft(draft: AiDraft) {
     if (form.body.trim()) {
-      const ok = window.confirm("Replace the current body and title with the AI draft?");
-      if (!ok) return;
+      setPendingDraft(draft);
+      return;
     }
+    insertDraft(draft);
+  }
+
+  function insertDraft(draft: AiDraft) {
     update({
       title: draft.title,
       summary: draft.summary,
@@ -243,6 +287,7 @@ export function PostForm({ mode, initial }: { mode: "new" | "edit"; initial?: Ad
       body: draft.body,
       sources: draft.sources,
       aiGenerated: true,
+      ...(slugAuto ? { slug: slugifyTitle(draft.title) } : {}),
     });
     setToast({ text: "AI draft inserted. Review and edit before publishing." });
   }
@@ -253,24 +298,28 @@ export function PostForm({ mode, initial }: { mode: "new" | "edit"; initial?: Ad
         <div>
           <h1 className="a-title">{mode === "new" ? "New post" : "Edit post"}</h1>
           <p className="a-subtitle">
-            <span className={`a-status a-status-${status}`}>{status}</span>{" "}
+            <span className={`a-status a-status-${status}`}>{status}</span>
             {initial ? <span className="a-muted">/ {initial.slug}</span> : null}
+            {dirty ? <span className="a-unsaved">Unsaved changes</span> : null}
           </p>
         </div>
-        <div className="a-row">
+        <div className="a-page-actions">
           {initial ? (
             <button className="a-btn a-btn-outline" type="button" onClick={preview} disabled={saving}>
-              <Icon name="search" size={16} />
+              <Icon name="eye" size={16} />
               Preview
             </button>
           ) : null}
           <button className="a-btn a-btn-outline" type="button" onClick={() => setAiOpen(true)} disabled={saving}>
-            <Icon name="pen" size={16} />
+            <Icon name="star" size={16} />
             Generate with AI
           </button>
-          <button className="a-btn a-btn-outline" type="button" onClick={() => persist({ status: "draft" })} disabled={saving}>
-            Save draft
-          </button>
+          {status !== "published" ? (
+            <button className="a-btn a-btn-outline" type="button" onClick={() => persist({ status: "draft" })} disabled={saving}>
+              {saving ? <span className="a-spinner a-spinner-dark" aria-hidden="true" /> : null}
+              Save draft
+            </button>
+          ) : null}
           {status === "published" ? (
             <button className="a-btn" type="button" onClick={() => persist({ status: "published" })} disabled={saving}>
               {saving ? <span className="a-spinner" aria-hidden="true" /> : null}
@@ -286,7 +335,8 @@ export function PostForm({ mode, initial }: { mode: "new" | "edit"; initial?: Ad
 
       {savedDraft ? (
         <div className="a-banner a-banner-info">
-          <div className="a-row" style={{ justifyContent: "space-between" }}>
+          <Icon name="history" size={18} />
+          <div className="a-row" style={{ justifyContent: "space-between", flex: 1 }}>
             <span>Unsaved changes from {new Date(savedDraft.savedAt).toLocaleString()} were found.</span>
             <span className="a-row">
               <button className="a-btn a-btn-sm" type="button" onClick={restore}>
@@ -301,39 +351,77 @@ export function PostForm({ mode, initial }: { mode: "new" | "edit"; initial?: Ad
       ) : null}
 
       {error ? (
-        <p className="a-banner a-banner-error" role="alert">
-          {error}
-        </p>
+        <div className="a-banner a-banner-error" role="alert">
+          <Icon name="alert-circle" size={18} />
+          <span>{error}</span>
+        </div>
       ) : null}
 
       <div className="a-form-layout">
         <div className="a-stack">
           <section className="a-card a-stack">
             <div className="a-field">
-              <label htmlFor="post-title">Title</label>
+              <label htmlFor="post-title">
+                Title <span className="a-req">*</span>
+              </label>
               <input
                 id="post-title"
                 className="a-input"
                 value={form.title}
                 maxLength={300}
-                onChange={(event) => update({ title: event.target.value })}
+                onChange={(event) => onTitleChange(event.target.value)}
+                aria-invalid={issue?.field === "post-title"}
               />
+              {issue?.field === "post-title" ? (
+                <span className="a-error-text">
+                  <Icon name="alert-circle" size={14} />
+                  {issue.message}
+                </span>
+              ) : null}
             </div>
 
             <div className="a-field">
-              <label htmlFor="post-slug">Slug (URL)</label>
-              <input
-                id="post-slug"
-                className="a-input"
-                value={form.slug}
-                onChange={(event) => update({ slug: event.target.value.trim() })}
-                placeholder="033s22"
-              />
-              <small>Stable identifier. Existing slugs must not change or the old URL breaks. Format: 3 digits + f/s/w + 2 digits.</small>
+              <label htmlFor="post-slug">
+                Slug (URL) <span className="a-req">*</span>
+              </label>
+              <div className="a-slug-row">
+                <input
+                  id="post-slug"
+                  className="a-input"
+                  value={form.slug}
+                  maxLength={120}
+                  onChange={(event) => onSlugChange(event.target.value)}
+                  placeholder="my-post-title"
+                  aria-invalid={issue?.field === "post-slug"}
+                />
+                <button
+                  className="a-btn a-btn-outline"
+                  type="button"
+                  onClick={generateSlug}
+                  disabled={!form.title.trim()}
+                  title="Generate the slug from the title"
+                >
+                  <Icon name="refresh" size={16} />
+                  Generate
+                </button>
+              </div>
+              <small>
+                {slugAuto
+                  ? "Auto-generated from the title. Type in the field to customize it."
+                  : "Custom slug. Changing the slug of an existing post breaks its old URL."}
+              </small>
+              {issue?.field === "post-slug" ? (
+                <span className="a-error-text">
+                  <Icon name="alert-circle" size={14} />
+                  {issue.message}
+                </span>
+              ) : null}
             </div>
 
             <div className="a-field">
-              <label htmlFor="post-summary">Summary (shown on cards)</label>
+              <label htmlFor="post-summary">
+                Summary <span className="a-req">*</span>
+              </label>
               <textarea
                 id="post-summary"
                 className="a-textarea"
@@ -341,7 +429,17 @@ export function PostForm({ mode, initial }: { mode: "new" | "edit"; initial?: Ad
                 maxLength={1000}
                 value={form.summary}
                 onChange={(event) => update({ summary: event.target.value })}
+                aria-invalid={issue?.field === "post-summary"}
               />
+              <small>
+                Shown on post cards. {form.summary.length}/1000 characters.
+              </small>
+              {issue?.field === "post-summary" ? (
+                <span className="a-error-text">
+                  <Icon name="alert-circle" size={14} />
+                  {issue.message}
+                </span>
+              ) : null}
             </div>
 
             <div className="a-field">
@@ -354,33 +452,46 @@ export function PostForm({ mode, initial }: { mode: "new" | "edit"; initial?: Ad
                 value={form.description}
                 onChange={(event) => update({ description: event.target.value })}
               />
-              <small>Used for meta description and social previews. Falls back to the summary.</small>
+              <small>
+                Used for meta description and social previews. Falls back to the summary. {form.description.length}/2000
+                characters.
+              </small>
             </div>
           </section>
 
           <section className="a-card a-stack">
             <div className="a-field">
-              <label htmlFor="post-body">Body (Markdown)</label>
+              <label htmlFor="post-body">
+                Body (Markdown) <span className="a-req">*</span>
+              </label>
               <textarea
                 id="post-body"
                 className="a-textarea a-body-input"
                 value={form.body}
                 onChange={(event) => update({ body: event.target.value })}
                 spellCheck={false}
+                aria-invalid={issue?.field === "post-body"}
               />
               <small>Markdown only. HTML is stripped when rendered. Use ## for section headings, &gt; for quotes.</small>
+              {issue?.field === "post-body" ? (
+                <span className="a-error-text">
+                  <Icon name="alert-circle" size={14} />
+                  {issue.message}
+                </span>
+              ) : null}
             </div>
           </section>
 
           <section className="a-card a-stack">
-            <div className="a-row" style={{ justifyContent: "space-between" }}>
+            <div className="a-card-head">
               <div>
-                <h2 className="a-title" style={{ fontSize: "1.05rem" }}>
-                  Sources
-                </h2>
-                <p className="a-subtitle">Verify every link before publishing. Optional.</p>
+                <h2 className="a-section-title">Sources</h2>
+                <p className="a-subtitle" style={{ marginTop: "0.2rem" }}>
+                  Verify every link before publishing. Optional.
+                </p>
               </div>
               <button className="a-btn a-btn-outline a-btn-sm" type="button" onClick={addSource}>
+                <Icon name="plus" size={15} />
                 Add source
               </button>
             </div>
@@ -404,8 +515,14 @@ export function PostForm({ mode, initial }: { mode: "new" | "edit"; initial?: Ad
                     value={source.url}
                     onChange={(event: ChangeEvent<HTMLInputElement>) => updateSource(index, { url: event.target.value })}
                   />
-                  <button className="a-btn a-btn-outline a-btn-sm" type="button" onClick={() => removeSource(index)}>
-                    Remove
+                  <button
+                    className="a-icon-btn is-danger"
+                    type="button"
+                    aria-label={`Remove source ${index + 1}`}
+                    title="Remove source"
+                    onClick={() => removeSource(index)}
+                  >
+                    <Icon name="trash" size={16} />
                   </button>
                 </div>
               ))
@@ -415,18 +532,25 @@ export function PostForm({ mode, initial }: { mode: "new" | "edit"; initial?: Ad
 
         <div className="a-stack">
           <section className="a-card a-stack">
-            <h2 className="a-title" style={{ fontSize: "1.05rem" }}>
-              Publishing
-            </h2>
+            <h2 className="a-section-title">Publishing</h2>
             <div className="a-field">
-              <label htmlFor="post-date">Publish date</label>
+              <label htmlFor="post-date">
+                Publish date <span className="a-req">*</span>
+              </label>
               <input
                 id="post-date"
                 className="a-input"
                 type="date"
                 value={form.publishedAt}
                 onChange={(event) => update({ publishedAt: event.target.value })}
+                aria-invalid={issue?.field === "post-date"}
               />
+              {issue?.field === "post-date" ? (
+                <span className="a-error-text">
+                  <Icon name="alert-circle" size={14} />
+                  {issue.message}
+                </span>
+              ) : null}
             </div>
             <div className="a-field">
               <label htmlFor="post-lang">Language</label>
@@ -441,34 +565,29 @@ export function PostForm({ mode, initial }: { mode: "new" | "edit"; initial?: Ad
               </select>
             </div>
             {status === "published" ? (
-              <button
-                className="a-btn a-btn-outline"
-                type="button"
-                onClick={() => persist({ status: "draft" })}
-                disabled={saving}
-              >
+              <button className="a-btn a-btn-outline" type="button" onClick={() => setUnpublishOpen(true)} disabled={saving}>
+                <Icon name="eye-off" size={16} />
                 Unpublish
               </button>
             ) : null}
             {initial ? (
               <a className="a-btn a-btn-ghost" href={`/posts/${form.slug}/`} target="_blank" rel="noreferrer">
+                <Icon name="arrow-up-right" size={16} />
                 View public URL
               </a>
             ) : null}
           </section>
 
           <section className="a-card a-stack">
-            <h2 className="a-title" style={{ fontSize: "1.05rem" }}>
-              Cover image
-            </h2>
+            <h2 className="a-section-title">Cover image</h2>
             <ImageUploader value={form.image} onChange={(image) => update({ image })} />
           </section>
 
           <section className="a-card a-stack">
-            <h2 className="a-title" style={{ fontSize: "1.05rem" }}>
-              Categories
+            <h2 className="a-section-title">
+              Categories <span className="a-req">*</span>
             </h2>
-            <div className="a-checks">
+            <div className="a-checks" id="post-categories" tabIndex={-1}>
               {CATEGORIES_LABEL.map((item) => (
                 <label className="a-check" key={item.value}>
                   <input
@@ -480,7 +599,18 @@ export function PostForm({ mode, initial }: { mode: "new" | "edit"; initial?: Ad
                 </label>
               ))}
             </div>
-            {form.aiGenerated ? <p className="a-banner a-banner-info">This draft was started with AI assistance.</p> : null}
+            {issue?.field === "post-categories" ? (
+              <span className="a-error-text">
+                <Icon name="alert-circle" size={14} />
+                {issue.message}
+              </span>
+            ) : null}
+            {form.aiGenerated ? (
+              <p className="a-banner a-banner-info">
+                <Icon name="star" size={16} />
+                This draft was started with AI assistance.
+              </p>
+            ) : null}
           </section>
         </div>
       </div>
@@ -504,7 +634,42 @@ export function PostForm({ mode, initial }: { mode: "new" | "edit"; initial?: Ad
         </p>
       </ConfirmDialog>
 
-      {toast ? <div className={`a-toast ${toast.error ? "a-toast-error" : ""}`}>{toast.text}</div> : null}
+      <ConfirmDialog
+        open={unpublishOpen}
+        title="Unpublish this post?"
+        description="The post will be hidden from the public site and its URL will start returning 404. You can publish it again at any time."
+        confirmLabel="Unpublish"
+        loading={saving}
+        onConfirm={async () => {
+          setUnpublishOpen(false);
+          await persist({ status: "draft" });
+        }}
+        onCancel={() => setUnpublishOpen(false)}
+      />
+
+      <ConfirmDialog
+        open={Boolean(pendingDraft)}
+        title="Replace current content?"
+        description="The AI draft will replace the title, summary, SEO description, body and sources currently in the editor."
+        confirmLabel="Replace content"
+        danger
+        onConfirm={() => {
+          if (pendingDraft) insertDraft(pendingDraft);
+          setPendingDraft(null);
+        }}
+        onCancel={() => setPendingDraft(null)}
+      />
+
+      {toast ? (
+        <div
+          className={`a-toast ${toast.error ? "a-toast-error" : ""}`}
+          role={toast.error ? "alert" : "status"}
+          aria-live={toast.error ? "assertive" : "polite"}
+        >
+          <Icon name={toast.error ? "alert-circle" : "check-circle"} size={18} />
+          {toast.text}
+        </div>
+      ) : null}
     </div>
   );
 }

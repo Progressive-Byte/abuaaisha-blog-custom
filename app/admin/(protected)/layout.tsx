@@ -10,8 +10,13 @@ export default async function ProtectedAdminLayout({ children }: { children: Rea
 
   return (
     <div className="a-shell">
+      <a className="skip-link" href="#a-main">
+        Skip to content
+      </a>
       <AdminNav email={session.email} />
-      <main className="a-main">{children}</main>
+      <main className="a-main" id="a-main">
+        {children}
+      </main>
     </div>
   );
 }

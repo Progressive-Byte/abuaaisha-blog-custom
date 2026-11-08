@@ -7,5 +7,5 @@ export const metadata: Metadata = {
 };
 
 export default function AdminRootLayout({ children }: { children: React.ReactNode }) {
-  return children;
+  return <div lang="en">{children}</div>;
 }

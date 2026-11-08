@@ -73,6 +73,7 @@ export const PostModel: Model<PostDocument> =
 export interface ContactMessageDocument {
   name: string;
   email: string;
+  phone?: string;
   subject: string;
   message: string;
   ipHash?: string;
@@ -84,6 +85,7 @@ const contactMessageSchema = new Schema<ContactMessageDocument>(
   {
     name: { type: String, required: true },
     email: { type: String, required: true },
+    phone: { type: String },
     subject: { type: String, required: true },
     message: { type: String, required: true },
     ipHash: { type: String },

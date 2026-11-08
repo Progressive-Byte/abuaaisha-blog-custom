@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { POST_SLUG_PATTERN, postInputSchema, postSchema } from "../lib/post-schema";
+import { SLUG_PATTERN, slugifyTitle, postInputSchema, postSchema } from "../lib/post-schema";
 
 const validPost = {
   title: "Test",
@@ -25,10 +25,23 @@ describe("postSchema", () => {
 });
 
 describe("slug", () => {
-  it("matches the existing numbering scheme", () => {
-    expect(POST_SLUG_PATTERN.test("033s22")).toBe(true);
-    expect(POST_SLUG_PATTERN.test("001f01")).toBe(true);
-    expect(POST_SLUG_PATTERN.test("hello-world")).toBe(false);
+  it("accepts legacy numbering and title-style slugs", () => {
+    expect(SLUG_PATTERN.test("033s22")).toBe(true);
+    expect(SLUG_PATTERN.test("001f01")).toBe(true);
+    expect(SLUG_PATTERN.test("hello-world")).toBe(true);
+    expect(SLUG_PATTERN.test("সমকালীন-পৃথিবীতে")).toBe(true);
+  });
+
+  it("rejects malformed slugs", () => {
+    expect(SLUG_PATTERN.test("has space")).toBe(false);
+    expect(SLUG_PATTERN.test("-leading")).toBe(false);
+    expect(SLUG_PATTERN.test("double--hyphen")).toBe(false);
+  });
+
+  it("builds a slug from a title", () => {
+    expect(slugifyTitle("Hello, World!")).toBe("hello-world");
+    expect(slugifyTitle("A — B")).toBe("a-b");
+    expect(slugifyTitle("  সমকালীন পৃথিবীতে  ")).toBe("সমকালীন-পৃথিবীতে");
   });
 });
 
@@ -49,7 +62,7 @@ describe("postInputSchema", () => {
   });
 
   it("rejects a malformed slug", () => {
-    expect(postInputSchema.safeParse({ ...input, slug: "nope" }).success).toBe(false);
+    expect(postInputSchema.safeParse({ ...input, slug: "bad slug" }).success).toBe(false);
   });
 
   it("requires alt text for a cover", () => {

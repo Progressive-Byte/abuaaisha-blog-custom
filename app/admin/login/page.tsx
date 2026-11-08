@@ -18,7 +18,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
   const { next } = await searchParams;
 
   return (
-    <div className="a-login">
+    <main className="a-login">
       <div className="a-login-card">
         <div className="a-login-brand">
           <span className="a-brand-mark">
@@ -36,7 +36,11 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
           <p className="a-subtitle">Use the admin account configured in your environment variables.</p>
         </div>
         <LoginForm next={next} />
+        <div className="a-login-foot">
+          <Icon name="lock" size={14} />
+          Protected area — admin access only
+        </div>
       </div>
-    </div>
+    </main>
   );
 }

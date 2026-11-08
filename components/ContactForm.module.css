@@ -21,6 +21,13 @@
   line-height: 1.5;
 }
 
+.optional {
+  margin-left: 0.25rem;
+  color: var(--color-ink-500);
+  font-size: var(--text-meta);
+  font-weight: 400;
+}
+
 .input,
 .field textarea {
   border: 1.5px solid var(--color-line-strong);

@@ -4,10 +4,11 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { Icon } from "@/components/Icon";
 import { ConfirmDialog } from "./ConfirmDialog";
+import { PostPreviewDialog } from "./PostPreviewDialog";
 import { api, ApiError } from "@/lib/api-client";
 import type { AdminPostSummary, PostsResponse } from "@/lib/admin-types";
 import { CATEGORY_META, CATEGORIES_LABEL } from "@/lib/admin-constants";
-import { formatDate } from "@/lib/format";
+import { formatAdminDate } from "@/lib/format";
 
 const PER_PAGE = 10;
 
@@ -21,10 +22,16 @@ export function PostList() {
   const [category, setCategory] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [reload, setReload] = useState(0);
   const [toast, setToast] = useState<{ text: string; error?: boolean } | null>(null);
   const [pendingDelete, setPendingDelete] = useState<AdminPostSummary | null>(null);
+  const [pendingUnpublish, setPendingUnpublish] = useState<AdminPostSummary | null>(null);
+  const [previewPost, setPreviewPost] = useState<AdminPostSummary | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [unpublishing, setUnpublishing] = useState(false);
   const [busyId, setBusyId] = useState<string | null>(null);
+
+  const hasFilters = Boolean(query.trim() || status || category);
 
   const params = useMemo(() => {
     const search = new URLSearchParams({ page: String(page), perPage: String(PER_PAGE) });
@@ -58,18 +65,24 @@ export function PostList() {
       active = false;
       window.clearTimeout(timer);
     };
-  }, [params]);
+  }, [params, reload]);
 
   useEffect(() => {
     if (!toast) return;
-    const timer = window.setTimeout(() => setToast(null), 3000);
+    const timer = window.setTimeout(() => setToast(null), 3200);
     return () => window.clearTimeout(timer);
   }, [toast]);
 
-  async function toggleStatus(post: AdminPostSummary) {
+  function clearFilters() {
+    setQuery("");
+    setStatus("");
+    setCategory("");
+    setPage(1);
+  }
+
+  async function setPostStatus(post: AdminPostSummary, next: "draft" | "published") {
     setBusyId(post.id);
     try {
-      const next = post.status === "published" ? "draft" : "published";
       await api(`/admin/posts/${post.id}/status`, { method: "POST", body: JSON.stringify({ status: next }) });
       setPosts((current) => current.map((item) => (item.id === post.id ? { ...item, status: next } : item)));
       setToast({ text: next === "published" ? "Post published." : "Post unpublished." });
@@ -80,14 +93,33 @@ export function PostList() {
     }
   }
 
+  function requestStatusChange(post: AdminPostSummary) {
+    if (post.status === "published") {
+      setPendingUnpublish(post);
+      return;
+    }
+    void setPostStatus(post, "published");
+  }
+
+  async function confirmUnpublish() {
+    if (!pendingUnpublish) return;
+    setUnpublishing(true);
+    try {
+      await setPostStatus(pendingUnpublish, "draft");
+    } finally {
+      setUnpublishing(false);
+      setPendingUnpublish(null);
+    }
+  }
+
   async function confirmDelete() {
     if (!pendingDelete) return;
     setDeleting(true);
     try {
       await api(`/admin/posts/${pendingDelete.id}`, { method: "DELETE" });
-      setPosts((current) => current.filter((item) => item.id !== pendingDelete.id));
-      setTotal((value) => Math.max(0, value - 1));
       setToast({ text: "Post deleted." });
+      if (posts.length === 1 && page > 1) setPage(page - 1);
+      else setReload((value) => value + 1);
       setPendingDelete(null);
     } catch (err) {
       setToast({ text: err instanceof ApiError ? err.message : "Delete failed", error: true });
@@ -95,6 +127,9 @@ export function PostList() {
       setDeleting(false);
     }
   }
+
+  const start = posts.length === 0 ? 0 : (page - 1) * PER_PAGE + 1;
+  const end = (page - 1) * PER_PAGE + posts.length;
 
   return (
     <div className="a-stack">
@@ -105,27 +140,32 @@ export function PostList() {
             {total} {total === 1 ? "post" : "posts"}
           </p>
         </div>
-        <Link className="a-btn" href="/admin/posts/new/">
-          <Icon name="pen" size={16} />
-          New post
-        </Link>
+        <div className="a-page-actions">
+          <Link className="a-btn" href="/admin/posts/new/">
+            <Icon name="pen" size={16} />
+            New post
+          </Link>
+        </div>
       </header>
 
       <section className="a-card a-stack">
-        <div className="a-row">
-          <div className="a-field" style={{ flex: "1 1 16rem" }}>
+        <div className="a-filters">
+          <div className="a-field">
             <label htmlFor="admin-search">Search</label>
-            <input
-              id="admin-search"
-              className="a-input"
-              type="search"
-              placeholder="Title, summary or slug"
-              value={query}
-              onChange={(event) => {
-                setPage(1);
-                setQuery(event.target.value);
-              }}
-            />
+            <div className="a-search">
+              <Icon name="search" size={18} />
+              <input
+                id="admin-search"
+                className="a-input"
+                type="search"
+                placeholder="Title, summary or slug"
+                value={query}
+                onChange={(event) => {
+                  setPage(1);
+                  setQuery(event.target.value);
+                }}
+              />
+            </div>
           </div>
           <div className="a-field">
             <label htmlFor="admin-status">Status</label>
@@ -162,42 +202,83 @@ export function PostList() {
               ))}
             </select>
           </div>
+          {hasFilters ? (
+            <button className="a-btn a-btn-ghost a-btn-sm" type="button" onClick={clearFilters}>
+              Clear filters
+            </button>
+          ) : null}
         </div>
 
         {error ? (
-          <p className="a-banner a-banner-error" role="alert">
-            {error}
-          </p>
+          <div className="a-banner a-banner-error" role="alert">
+            <Icon name="alert-circle" size={18} />
+            <span>{error}</span>
+          </div>
         ) : null}
 
         <div className="a-table-wrap">
-          <table className="a-table">
+          <table className="a-table" aria-busy={loading}>
             <thead>
               <tr>
-                <th>Post</th>
-                <th>Status</th>
-                <th>Category</th>
-                <th>Published</th>
-                <th>Actions</th>
+                <th scope="col">Post</th>
+                <th scope="col">Status</th>
+                <th scope="col">Category</th>
+                <th scope="col">Date</th>
+                <th scope="col">
+                  <span className="visually-hidden">Actions</span>
+                </th>
               </tr>
             </thead>
             <tbody>
-              {loading ? (
+              {loading && posts.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="a-empty">
-                    Loading posts…
+                  <td colSpan={5}>
+                    <div aria-hidden="true">
+                      <div className="a-skeleton-row">
+                        <span className="a-skeleton" />
+                        <span className="a-skeleton" />
+                      </div>
+                      <div className="a-skeleton-row">
+                        <span className="a-skeleton" />
+                        <span className="a-skeleton" />
+                      </div>
+                      <div className="a-skeleton-row">
+                        <span className="a-skeleton" />
+                        <span className="a-skeleton" />
+                      </div>
+                    </div>
+                    <p className="visually-hidden">Loading posts…</p>
                   </td>
                 </tr>
               ) : posts.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="a-empty">
-                    No posts match these filters.
+                  <td colSpan={5}>
+                    <div className="a-empty">
+                      <span className="a-empty-icon">
+                        <Icon name={hasFilters ? "search" : "book"} size={22} />
+                      </span>
+                      <strong>{hasFilters ? "No posts match these filters" : "No posts yet"}</strong>
+                      <span>
+                        {hasFilters ? "Try a different search or clear the filters." : "Create your first post to get started."}
+                      </span>
+                      <div className="a-empty-actions">
+                        {hasFilters ? (
+                          <button className="a-btn a-btn-outline a-btn-sm" type="button" onClick={clearFilters}>
+                            Clear filters
+                          </button>
+                        ) : (
+                          <Link className="a-btn a-btn-sm" href="/admin/posts/new/">
+                            New post
+                          </Link>
+                        )}
+                      </div>
+                    </div>
                   </td>
                 </tr>
               ) : (
                 posts.map((post) => (
                   <tr key={post.id}>
-                    <td>
+                    <td data-label="Post">
                       <div className="a-row" style={{ flexWrap: "nowrap" }}>
                         {post.image ? (
                           // eslint-disable-next-line @next/next/no-img-element
@@ -211,30 +292,54 @@ export function PostList() {
                         </div>
                       </div>
                     </td>
-                    <td>
+                    <td data-label="Status">
                       <span className={`a-status a-status-${post.status}`}>{post.status}</span>
                     </td>
-                    <td>{CATEGORY_META[post.categories[0]].label}</td>
-                    <td className="a-muted">{formatDate(new Date(post.publishedAt))}</td>
-                    <td>
-                      <div className="a-row" style={{ flexWrap: "nowrap" }}>
-                        <Link className="a-btn a-btn-outline a-btn-sm" href={`/admin/posts/${post.id}/edit/`}>
-                          Edit
+                    <td data-label="Category">{CATEGORY_META[post.categories[0]]?.label ?? "—"}</td>
+                    <td data-label="Date" className="a-muted">
+                      {formatAdminDate(new Date(post.publishedAt))}
+                    </td>
+                    <td data-label="Actions">
+                      <div className="a-row">
+                        <button
+                          className="a-icon-btn"
+                          type="button"
+                          aria-label={`Preview ${post.title}`}
+                          title="Preview post"
+                          onClick={() => setPreviewPost(post)}
+                        >
+                          <Icon name="eye" size={16} />
+                        </button>
+                        <Link
+                          className="a-icon-btn"
+                          href={`/admin/posts/${post.id}/edit/`}
+                          aria-label={`Edit ${post.title}`}
+                          title="Edit post"
+                        >
+                          <Icon name="pen" size={16} />
                         </Link>
                         <button
-                          className="a-btn a-btn-outline a-btn-sm"
+                          className="a-icon-btn"
                           type="button"
                           disabled={busyId === post.id}
-                          onClick={() => toggleStatus(post)}
+                          aria-label={`${post.status === "published" ? "Unpublish" : "Publish"} ${post.title}`}
+                          title={post.status === "published" ? "Unpublish" : "Publish"}
+                          onClick={() => requestStatusChange(post)}
                         >
-                          {post.status === "published" ? "Unpublish" : "Publish"}
+                          {busyId === post.id ? (
+                            <span className="a-spinner a-spinner-dark" aria-hidden="true" />
+                          ) : (
+                            <Icon name={post.status === "published" ? "eye-off" : "check-circle"} size={16} />
+                          )}
                         </button>
                         <button
-                          className="a-btn a-btn-danger a-btn-sm"
+                          className="a-icon-btn is-danger"
                           type="button"
+                          aria-label={`Delete ${post.title}`}
+                          title="Delete post"
                           onClick={() => setPendingDelete(post)}
                         >
-                          Delete
+                          <Icon name="trash" size={16} />
                         </button>
                       </div>
                     </td>
@@ -247,28 +352,32 @@ export function PostList() {
 
         <div className="a-pagination">
           <span className="a-muted">
-            Page {page} of {pages}
+            {posts.length === 0 ? "No results" : `Showing ${start}–${end} of ${total}`}
           </span>
           <div className="a-row">
             <button
               className="a-btn a-btn-outline a-btn-sm"
               type="button"
-              disabled={page <= 1}
+              disabled={page <= 1 || loading}
               onClick={() => setPage((value) => Math.max(1, value - 1))}
             >
+              <Icon name="chevron-left" size={15} />
               Previous
             </button>
             <button
               className="a-btn a-btn-outline a-btn-sm"
               type="button"
-              disabled={page >= pages}
+              disabled={page >= pages || loading}
               onClick={() => setPage((value) => Math.min(pages, value + 1))}
             >
               Next
+              <Icon name="chevron-right" size={15} />
             </button>
           </div>
         </div>
       </section>
+
+      <PostPreviewDialog post={previewPost} onClose={() => setPreviewPost(null)} />
 
       <ConfirmDialog
         open={Boolean(pendingDelete)}
@@ -285,7 +394,30 @@ export function PostList() {
         onCancel={() => setPendingDelete(null)}
       />
 
-      {toast ? <div className={`a-toast ${toast.error ? "a-toast-error" : ""}`}>{toast.text}</div> : null}
+      <ConfirmDialog
+        open={Boolean(pendingUnpublish)}
+        title="Unpublish this post?"
+        description={
+          pendingUnpublish
+            ? `“${pendingUnpublish.title}” will be hidden from the public site and its URL will start returning 404. You can publish it again at any time.`
+            : ""
+        }
+        confirmLabel="Unpublish"
+        loading={unpublishing}
+        onConfirm={confirmUnpublish}
+        onCancel={() => setPendingUnpublish(null)}
+      />
+
+      {toast ? (
+        <div
+          className={`a-toast ${toast.error ? "a-toast-error" : ""}`}
+          role={toast.error ? "alert" : "status"}
+          aria-live={toast.error ? "assertive" : "polite"}
+        >
+          <Icon name={toast.error ? "alert-circle" : "check-circle"} size={18} />
+          {toast.text}
+        </div>
+      ) : null}
     </div>
   );
 }

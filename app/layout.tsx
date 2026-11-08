@@ -1,8 +1,8 @@
 import type { Metadata, Viewport } from "next";
-import "@fontsource/hind-siliguri/400.css";
-import "@fontsource/hind-siliguri/500.css";
-import "@fontsource/hind-siliguri/600.css";
-import "@fontsource/hind-siliguri/700.css";
+import "@fontsource/anek-bangla/400.css";
+import "@fontsource/anek-bangla/500.css";
+import "@fontsource/anek-bangla/600.css";
+import "@fontsource/anek-bangla/700.css";
 import "@/styles/globals.css";
 import { SITE, SITE_URL } from "@/lib/site";
 

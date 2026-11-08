@@ -12,6 +12,12 @@ export const contactRoutes = Router();
 const contactSchema = z.object({
   name: z.string().trim().min(1, "Name is required").max(100),
   email: z.string().trim().email("A valid email is required").max(200),
+  phone: z
+    .string()
+    .trim()
+    .max(30)
+    .refine((value) => value === "" || /^\+?[\d\s\-().]{6,30}$/.test(value), "A valid phone number is required")
+    .optional(),
   subject: z.string().trim().min(1).max(200),
   message: z.string().trim().min(5, "Message is too short").max(5000),
   botField: z.string().max(500).optional(),
@@ -39,6 +45,7 @@ contactRoutes.post(
     const record = await ContactMessageModel.create({
       name: input.name,
       email: input.email,
+      phone: input.phone || undefined,
       subject: input.subject,
       message: input.message,
       ipHash: hashIp(ip),
