@@ -58,7 +58,7 @@ const steps = [
 
 const channels = [
   { icon: "mail", label: "ইমেইল", value: SITE.email, href: `mailto:${SITE.email}` },
-  { icon: "chat", label: "যোগাযোগ ফর্ম", value: "বার্তা পাঠান", href: "/contact/", modal: true },
+  { icon: "chat", label: "কাউন্সেলিং", value: "সেশন বুক করুন", href: "/contact/", modal: true },
   { icon: "linkedin", label: "লিংকডইন", value: SITE.linkedin.label, href: SITE.linkedin.url },
   { icon: "youtube", label: "ইউটিউব", value: SITE.youtube.label, href: SITE.youtube.url },
 ];

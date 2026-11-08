@@ -116,6 +116,12 @@
   align-self: start;
 }
 
+.postToc {
+  max-height: calc(100vh - 8rem);
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
 .postToc h2,
 .asideBlock h2 {
   margin-bottom: var(--space-3);
@@ -141,12 +147,20 @@
   font-weight: 500;
   line-height: 1.5;
   text-decoration: none;
+  transition: color 0.15s, background-color 0.15s, border-color 0.15s;
 }
 
 .postToc a:hover {
   border-left-color: var(--color-accent-700);
   background: var(--color-paper-deep);
   color: var(--color-ink-900);
+}
+
+.postToc a[aria-current="location"] {
+  border-left-color: var(--color-gold-500);
+  background: var(--color-paper-deep);
+  color: var(--color-ink-900);
+  font-weight: 600;
 }
 
 .aside {
@@ -235,6 +249,11 @@
   .postToc,
   .aside {
     position: static;
+  }
+
+  .postToc {
+    max-height: none;
+    overflow: visible;
   }
 
   .postToc {

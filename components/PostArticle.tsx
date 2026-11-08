@@ -5,6 +5,7 @@ import { CtaBand } from "./CtaBand";
 import { Icon } from "./Icon";
 import { PostCard } from "./PostCard";
 import { PostInteractions } from "./PostInteractions";
+import { PostToc } from "./PostToc";
 import { formatDualDate, formatIsoDate, readingTimeLabel } from "@/lib/format";
 import { renderMarkdown } from "@/lib/markdown";
 import type { Post } from "@/lib/types";
@@ -91,18 +92,7 @@ export async function PostArticle({ post, newer, older, related, preview = false
         ) : null}
 
         <div className={`container ${styles.bodyGrid} ${toc.length === 0 ? styles.noToc : ""}`}>
-          {toc.length > 0 ? (
-            <nav className={styles.postToc} aria-labelledby="toc-title" lang="bn">
-              <h2 id="toc-title">এই লেখায় যা আছে</h2>
-              <ol>
-                {toc.map((heading) => (
-                  <li key={heading.id}>
-                    <a href={`#${heading.id}`}>{heading.text}</a>
-                  </li>
-                ))}
-              </ol>
-            </nav>
-          ) : null}
+          {toc.length > 0 ? <PostToc headings={toc} /> : null}
 
           <div className={styles.prose} data-prose="" lang={post.lang}>
             <div dangerouslySetInnerHTML={{ __html: html }} />
