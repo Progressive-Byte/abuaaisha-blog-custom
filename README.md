@@ -2,7 +2,7 @@
 
 Production blog with a Next.js 16 frontend, an Express API, MongoDB, Cloudinary image hosting, and AI-assisted drafting. Deployable as a single Vercel project (Next.js + one serverless Express function). The public design is a 1:1 port of the previous Astro site.
 
-> The previous Astro implementation is preserved untouched in `legacy-astro/` for reference and rollback. The original Markdown content is copied to `content/legacy/` and migrated into MongoDB.
+> The original Markdown content is copied to `content/legacy/` and migrated into MongoDB.
 
 ## Stack
 
@@ -129,7 +129,6 @@ server/                Express app, auth, routes, models, Cloudinary, AI, email
 components/            public design components + admin components
 lib/                   schema, formatters, MongoDB reads, markdown, auth helpers
 content/legacy/        original Markdown (migration source, never deleted)
-legacy-astro/          previous Astro app (reference / rollback)
 public/images/site/    existing static artwork
 ```
 

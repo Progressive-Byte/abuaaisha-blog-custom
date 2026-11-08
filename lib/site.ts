@@ -6,7 +6,7 @@ export const SITE = {
   tagline: "ব্লগ ও ইসলামিক কাউন্সেলিং",
   description:
     "সমকালীন মুসলিম জীবন, পরিবার ও সমাজ নিয়ে লেখা এবং পারিবারিক ও ব্যক্তিগত বিষয়ে আন্তরিক পরামর্শ।",
-  email: "contact@abuaaisha.com",
+  email: "chowdhury.mohammad.arif@gmail.com",
   linkedin: { label: "/in/abuaaisha", url: "https://www.linkedin.com/in/abuaaisha" },
   youtube: { label: "@abuaaisha", url: "https://www.youtube.com/@abuaaisha" },
   ogImage: "/images/site/hero-desk.webp",

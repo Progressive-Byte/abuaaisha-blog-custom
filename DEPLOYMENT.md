@@ -141,6 +141,6 @@ This upserts the 32 legacy posts and uploads their covers to `abuaaisha/posts/<s
 
 ## 10. Rollback
 
-- The previous Astro site is in `legacy-astro/` and can be deployed from Netlify as before.
+- The previous Astro site is archived outside this repository (backup); restore it and deploy on Netlify if needed.
 - MongoDB data and the original Markdown in `content/legacy/` are untouched by rollback.
 - Cloudinary assets are only removed when you delete a post or explicitly remove its image from the admin panel.

@@ -10,7 +10,6 @@ export default defineConfig([
     "out/**",
     "build/**",
     "dist/**",
-    "legacy-astro/**",
     "next-env.d.ts",
   ]),
 ]);

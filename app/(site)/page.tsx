@@ -43,17 +43,17 @@ export default async function HomePage() {
               <span className={styles.goldDot} />
               {SITE.name} · {SITE.tagline}
             </span>
-            <h1 id="hero-title">সমকালীন পৃথিবীতে মুসলিম জীবনের প্রশ্ন, ভাবনা ও সমাধানের খোঁজ</h1>
+            <h1 id="hero-title">সমকালীন পৃথিবীর মুসলিম জীবনের প্রশ্ন, আর সমস্যার উত্তরের খোঁজে</h1>
             <p className={styles.lede}>
               পরিবার, সন্তান প্রতিপালন, সমাজ আর দ্বীনের পথে অবিচল থাকার চ্যালেঞ্জ নিয়ে ব্যক্তিগত অভিজ্ঞতা থেকে লেখা—আর
               প্রয়োজনে আন্তরিক পরামর্শ।
             </p>
             <div className={styles.actions}>
               <Link className="btn btn--light" href="/counseling/#sessions">
-                সেশন বুক করুন <Icon name="arrow-right" />
+                লেখাগুলো পড়ুন
               </Link>
               <Link className="btn btn--ghost-light" href="/posts/">
-                লেখাগুলো পড়ুন
+                কাউন্সেলিং <Icon name="arrow-right" />
               </Link>
             </div>
             <ul className={styles.contact}>
@@ -66,17 +66,7 @@ export default async function HomePage() {
                   <a href={`mailto:${SITE.email}`}>{SITE.email}</a>
                 </span>
               </li>
-              <li>
-                <span className={styles.glassIcon}>
-                  <Icon name="chat" size={20} />
-                </span>
-                <span>
-                  <small>বার্তা পাঠান</small>
-                  <Link href="/contact/" data-contact-open="">
-                    যোগাযোগ ফর্ম
-                  </Link>
-                </span>
-              </li>
+              
             </ul>
           </div>
           <div className={styles.archWrap}>
@@ -99,7 +89,7 @@ export default async function HomePage() {
           />
           <div className={styles.authorCopy}>
             <span className="overline">লেখক পরিচিতি</span>
-            <h2 id="author-title">সালাফদের পদাঙ্ক অনুসরণ করে একজন অনুশীলনকারী মুসলিম হওয়ার চেষ্টা</h2>
+            <h2 id="author-title">সালাফদের পথ অনুসরণ করে দ্বীন পালনের চেষ্টায় একজন মুসলিম</h2>
             <p>
               নব্বইয়ের দশকে বেড়ে ওঠা আমি সেই সময়ের জীবনকে গভীরভাবে লালন করি—যে জীবন ছিল সামাজিক মেলামেশায় ভরপুর,
               প্রতিবেশী ও আত্মীয়স্বজনের মধ্যে ছিল সত্যিকারের আন্তরিক সম্পর্ক।
