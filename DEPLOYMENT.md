@@ -3,7 +3,7 @@
 This project deploys to **one Vercel project**:
 
 - Next.js app (public site + admin UI)
-- `api/[...path].ts` — the Express API as a Node serverless function
+- `pages/api/[...path].ts` — the Express API mounted as a Next.js API route
 
 ## Accounts you need
 
@@ -108,7 +108,7 @@ This upserts the 32 legacy posts and uploads their covers to `abuaaisha/posts/<s
 2. Import it in Vercel. Framework preset: **Next.js**. Root directory: repository root.
 3. Set every environment variable above for Production (and Preview if desired).
 4. Build command `npm run build`; output is handled by Next.js.
-5. Vercel picks up `api/[...path].ts` as a Node function. `vercel.json` sets `maxDuration: 60` (Hobby limit) for AI requests.
+5. Vercel deploys `pages/api/[...path].ts` as a Node function. `vercel.json` sets `maxDuration: 60` (Hobby limit) for AI requests.
 6. Deploy.
 
 `vercel.json` is intentionally minimal; add platform settings only if Vercel asks for them.

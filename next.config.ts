@@ -38,7 +38,7 @@ const nextConfig: NextConfig = {
   },
   async rewrites() {
     // In `next dev`, the Express API runs separately; in production it is the
-    // Vercel function at api/[...path].ts, so no rewrite is needed.
+    // Next.js API route at pages/api/[...path].ts, so no rewrite is needed.
     if (isProd) return [];
     const target = process.env.API_DEV_URL ?? "http://localhost:3001";
     return [{ source: "/api/:path*", destination: `${target}/api/:path*` }];

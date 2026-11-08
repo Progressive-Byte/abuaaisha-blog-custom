@@ -9,7 +9,7 @@ Production blog with a Next.js 16 frontend, an Express API, MongoDB, Cloudinary 
 | Layer | Choice |
 | --- | --- |
 | Frontend | Next.js 16 (App Router, TypeScript, React 19) |
-| API | Express 5 mounted as a Vercel serverless function (`api/[...path].ts`) via `serverless-http` |
+| API | Express 5 mounted as a Next.js API route (`pages/api/[...path].ts`) via `serverless-http` |
 | Database | MongoDB Atlas M0 + Mongoose (cached serverless connection) |
 | Images | Cloudinary signed uploads + `next/image` custom loader |
 | Auth | Single admin, bcrypt password hash, `jose` JWT in an httpOnly cookie |
@@ -39,7 +39,7 @@ cp .env.example .env.local     # then fill in values (see below)
 npm run dev                    # Next.js :3000 + Express :3001
 ```
 
-`npm run dev` starts both processes. `next.config.ts` proxies `/api/*` to `http://localhost:3001` in development; in production Vercel routes `/api/*` straight to the Express function. Use `npm run dev:web` / `npm run dev:api` to run them separately.
+`npm run dev` starts both processes. `next.config.ts` proxies `/api/*` to `http://localhost:3001` in development; in production the Next.js API route at `pages/api/[...path].ts` serves the Express app. Use `npm run dev:web` / `npm run dev:api` to run them separately.
 
 Minimum values to see content locally:
 
@@ -138,7 +138,7 @@ Text-only generation keeps requests inside Vercel's 60s function limit. Cover im
 app/(site)/            public pages, grouped so admin does not inherit the site chrome
 app/admin/             login + protected admin route group
 app/*.xml, sitemap.ts  feeds, sitemap, robots, revalidation webhook
-api/[...path].ts       Vercel function entry for Express
+pages/api/[...path].ts  Next.js API route that mounts the Express app
 server/                Express app, auth, routes, models, Cloudinary, AI, email
 components/            public design components + admin components
 lib/                   schema, formatters, MongoDB reads, markdown, auth helpers

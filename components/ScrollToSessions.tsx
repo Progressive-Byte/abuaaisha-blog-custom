@@ -11,7 +11,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 export function ScrollToSessions() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const requested = searchParams.get("scroll") === "sessions";
+  const requested = searchParams?.get("scroll") === "sessions";
 
   useEffect(() => {
     if (!requested) return;
