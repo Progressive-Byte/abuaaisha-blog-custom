@@ -1,0 +1,15 @@
+.narrow {
+  max-width: calc(42.5rem + 2 * var(--gutter));
+  padding-bottom: var(--space-9);
+}
+
+.direct {
+  margin-top: var(--space-6);
+  color: var(--color-ink-500);
+  text-align: center;
+}
+
+.direct a {
+  color: var(--color-accent-700);
+  font-weight: 600;
+}

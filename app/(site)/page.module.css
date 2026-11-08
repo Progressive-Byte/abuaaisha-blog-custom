@@ -1,0 +1,180 @@
+.hero {
+  padding-block: clamp(3rem, 2rem + 4vw, 8.25rem);
+}
+
+.heroGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 31.75rem);
+  align-items: center;
+  gap: var(--space-7) 2.5rem;
+}
+
+.intro {
+  display: grid;
+  justify-items: start;
+  max-width: 43.25rem;
+}
+
+.goldDot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: var(--color-gold-500);
+}
+
+.hero h1 {
+  margin-top: 1.75rem;
+  font-size: var(--text-hero);
+  font-weight: 700;
+  line-height: 1.24;
+  letter-spacing: -0.023em;
+}
+
+.lede {
+  margin-top: 1.75rem;
+  color: var(--color-on-dark);
+  font-size: var(--text-body-lg);
+  line-height: 1.7;
+  opacity: 0.9;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  margin-top: var(--space-6);
+}
+
+.contact {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-5) var(--space-7);
+  margin: var(--space-7) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.contact li {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.contact small {
+  display: block;
+  color: var(--color-on-dark-muted);
+  font-size: var(--text-meta);
+  line-height: 1.5;
+}
+
+.contact a {
+  color: var(--color-on-dark);
+  font-size: var(--text-h5);
+  font-weight: 600;
+  line-height: 1.5;
+  text-decoration: none;
+  overflow-wrap: anywhere;
+}
+
+.contact a:hover {
+  text-decoration: underline;
+}
+
+.glassIcon {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 3.5rem;
+  height: 3.5rem;
+  border: 1px solid var(--color-glass-line);
+  border-radius: 999px;
+  background: var(--color-glass);
+  color: var(--color-on-dark);
+}
+
+@media (max-width: 60rem) {
+  .heroGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .archWrap {
+    justify-self: center;
+    width: min(100%, 22rem);
+    order: -1;
+  }
+}
+
+.split {
+  display: grid;
+  grid-template-columns: minmax(0, 32.5rem) minmax(0, 1fr);
+  align-items: center;
+  gap: var(--space-7) 5.5rem;
+}
+
+.splitReverse {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 36.25rem);
+}
+
+.authorPhoto,
+.counselingPhoto {
+  width: 100%;
+  border-radius: var(--radius-xl);
+  object-fit: cover;
+}
+
+.authorPhoto {
+  aspect-ratio: 520 / 600;
+}
+
+.counselingPhoto {
+  aspect-ratio: 580 / 560;
+}
+
+.authorCopy,
+.counselingCopy {
+  display: grid;
+  justify-items: start;
+  gap: var(--space-5);
+}
+
+.authorCopy h2,
+.counselingCopy h2 {
+  font-size: var(--text-h2);
+  letter-spacing: -0.02em;
+}
+
+.authorCopy > p,
+.counselingCopy > p:not(.meta-row) {
+  font-size: var(--text-body-lg);
+  line-height: 1.7;
+}
+
+.authorCopy blockquote {
+  margin: 0;
+  padding: 0.25rem 0 0.25rem 1.5rem;
+  border-left: 3px solid var(--color-accent-700);
+  color: var(--color-ink-900);
+  font-size: var(--text-body-lg);
+  font-weight: 600;
+  line-height: 1.7;
+}
+
+.counselingCopy .actions {
+  margin-top: var(--space-2);
+}
+
+@media (max-width: 60rem) {
+  .split,
+  .splitReverse {
+    grid-template-columns: 1fr;
+  }
+
+  .authorPhoto {
+    aspect-ratio: 4 / 3;
+  }
+
+  .counselingPhoto {
+    order: -1;
+    aspect-ratio: 3 / 2;
+  }
+}

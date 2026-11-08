@@ -1,0 +1,30 @@
+.thanks {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-4);
+  max-width: 40rem;
+  padding-block: var(--space-9);
+  text-align: center;
+}
+
+.badge {
+  display: grid;
+  place-items: center;
+  width: 4.5rem;
+  height: 4.5rem;
+  border-radius: 999px;
+  background: var(--color-accent-50);
+  color: var(--color-accent-700);
+}
+
+.thanks h1 {
+  font-size: var(--text-h2);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-3);
+  margin-top: var(--space-4);
+}

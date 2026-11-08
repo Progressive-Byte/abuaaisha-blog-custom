@@ -1,0 +1,19 @@
+# build output
+.next/
+out/
+dist/
+.astro/
+.vercel/
+*.tsbuildinfo
+
+# dependencies
+node_modules/
+
+# env — never commit keys
+.env*
+!.env.example
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/

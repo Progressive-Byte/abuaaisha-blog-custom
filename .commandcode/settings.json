@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "powershell",
+      "Shell(npx tsx scripts/dev-mongo.ts)",
+      "Shell(npm:*)",
+      "Shell(npx next start -p 3002)"
+    ],
+    "deny": [],
+    "defaultMode": "default"
+  }
+}

@@ -1,0 +1,37 @@
+.cover {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 390 / 250;
+  object-fit: cover;
+  background: var(--color-paper-deep);
+}
+
+.placeholder {
+  position: relative;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 50% 50%, rgb(201 165 92 / 0.18), transparent 60%),
+    linear-gradient(135deg, var(--color-placeholder-from), var(--color-placeholder-to));
+}
+
+.placeholder::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: url("/images/site/khatam-tile.svg") center / 50% auto;
+  opacity: 0.35;
+}
+
+.glyph {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 4rem;
+  height: 4rem;
+  border: 1px solid rgb(255 255 255 / 0.2);
+  border-radius: 999px;
+  background: rgb(255 255 255 / 0.1);
+  color: var(--color-on-dark);
+}

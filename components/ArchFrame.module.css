@@ -1,0 +1,60 @@
+.arch {
+  position: relative;
+  width: min(100%, 31.75rem);
+  aspect-ratio: 507.84 / 636.64;
+  margin-top: 1.75rem;
+}
+
+.outline {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 99.64%;
+  height: 99.71%;
+  overflow: visible;
+}
+
+.outline path {
+  fill: none;
+  stroke: var(--color-gold-400);
+  stroke-width: 1.4;
+  stroke-opacity: 0.75;
+}
+
+.outlineInner {
+  left: 2.355%;
+  top: 1.879%;
+  width: 94.93%;
+  height: 95.95%;
+}
+
+.outlineInner path {
+  stroke-width: 1;
+  stroke-opacity: 0.35;
+}
+
+.photo {
+  position: absolute;
+  left: 4.71%;
+  top: 3.757%;
+  width: 90.58%;
+  height: 92.49%;
+}
+
+.photo img {
+  position: absolute;
+  left: -10%;
+  top: -3.13%;
+  width: 120%;
+  height: 115.63%;
+  max-width: none;
+}
+
+.apex {
+  position: absolute;
+  left: 48.01%;
+  top: -4.335%;
+  width: 3.986%;
+  height: auto;
+  fill: var(--color-gold-500);
+}

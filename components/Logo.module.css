@@ -1,0 +1,51 @@
+.logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.875rem;
+  text-decoration: none;
+}
+
+.mark {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 0.875rem;
+  background: var(--color-btn);
+  color: var(--color-on-dark);
+}
+
+.wordmark {
+  display: grid;
+  gap: 0.125rem;
+  white-space: nowrap;
+}
+
+.name {
+  color: var(--color-ink-900);
+  font-size: 1.4375rem;
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: -0.005em;
+}
+
+.tagline {
+  color: var(--color-ink-500);
+  font-size: var(--text-overline);
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.dark .mark {
+  background: var(--color-on-dark);
+  color: var(--color-on-light-btn);
+}
+
+.dark .name {
+  color: var(--color-on-dark);
+}
+
+.dark .tagline {
+  color: var(--color-on-dark-muted);
+}

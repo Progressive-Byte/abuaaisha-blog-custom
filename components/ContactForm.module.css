@@ -1,0 +1,114 @@
+.form {
+  display: grid;
+  gap: 1.75rem;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));
+  gap: var(--space-4);
+}
+
+.field {
+  display: grid;
+  gap: 0.625rem;
+}
+
+.field label {
+  color: var(--color-ink-900);
+  font-size: var(--text-ui);
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+.input,
+.field textarea {
+  border: 1.5px solid var(--color-line-strong);
+  border-radius: var(--radius);
+  background: var(--color-surface);
+  transition: border-color 0.15s;
+}
+
+.input {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  height: 3.75rem;
+  padding-inline: var(--space-4);
+  color: var(--color-ink-500);
+}
+
+.input:focus-within,
+.field textarea:focus {
+  border-color: var(--color-accent-700);
+}
+
+.input input,
+.input select {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  border: 0;
+  background: transparent;
+  color: var(--color-ink-900);
+  font-size: var(--text-small);
+  outline: none;
+}
+
+.selectInput select {
+  appearance: none;
+  padding-right: 1.75rem;
+  cursor: pointer;
+}
+
+.chevron {
+  position: absolute;
+  right: var(--space-4);
+  pointer-events: none;
+}
+
+.form ::placeholder {
+  color: var(--color-ink-500);
+  opacity: 1;
+}
+
+.field textarea {
+  min-height: 9.375rem;
+  padding: var(--space-4);
+  color: var(--color-ink-900);
+  font-size: var(--text-small);
+  line-height: 1.68;
+  resize: vertical;
+  outline: none;
+}
+
+.privacy {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  margin-top: calc(-1 * var(--space-3));
+  color: var(--color-ink-500);
+  font-size: var(--text-meta);
+}
+
+.status {
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius);
+  background: var(--color-accent-50);
+  color: var(--color-accent-700);
+  font-size: var(--text-meta);
+  text-align: center;
+}
+
+.error {
+  background: rgb(180 35 24 / 0.08);
+  color: var(--color-danger);
+}
+
+.form button:disabled {
+  opacity: 0.6;
+  cursor: progress;
+}
