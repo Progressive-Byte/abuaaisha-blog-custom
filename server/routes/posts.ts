@@ -8,6 +8,7 @@ import { assertValid } from "../lib/validate";
 import { revalidatePublicPages } from "../lib/revalidate";
 import { destroyAsset } from "../lib/cloudinary";
 import { postInputSchema, POST_STATUSES } from "../../lib/post-schema";
+import { usableImage } from "../../lib/post-image";
 
 export const postRoutes = Router();
 
@@ -27,7 +28,7 @@ function toAdminPost(doc: LeanAdminPost) {
     lang: doc.lang,
     status: doc.status,
     publishedAt: new Date(doc.publishedAt).toISOString(),
-    image: doc.image ?? null,
+    image: usableImage(doc.image) ?? null,
     aiGenerated: Boolean(doc.aiGenerated),
     sources: doc.sources ?? [],
     createdAt: new Date(doc.createdAt).toISOString(),
@@ -45,7 +46,7 @@ function toSummary(doc: LeanAdminPost) {
     lang: doc.lang,
     status: doc.status,
     publishedAt: new Date(doc.publishedAt).toISOString(),
-    image: doc.image ?? null,
+    image: usableImage(doc.image) ?? null,
     updatedAt: new Date(doc.updatedAt).toISOString(),
   };
 }

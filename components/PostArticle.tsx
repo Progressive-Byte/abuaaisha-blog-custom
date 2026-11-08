@@ -78,18 +78,17 @@ export async function PostArticle({ post, newer, older, related, preview = false
           </div>
         </header>
 
-        {post.image ? (
-          <div className={`container ${styles.coverWrap}`}>
-            <Image
-              className={styles.cover}
-              src={post.image.url}
-              alt={post.image.alt}
-              width={1170}
-              height={785}
-              priority
-            />
-          </div>
-        ) : null}
+        <div className={`container ${styles.coverWrap}`}>
+          <Image
+            className={styles.cover}
+            src={post.image?.url ?? SITE.postPlaceholder}
+            alt={post.image?.alt ?? ""}
+            width={1170}
+            height={785}
+            sizes="(min-width: 77.5rem) 1170px, 100vw"
+            priority
+          />
+        </div>
 
         <div className={`container ${styles.bodyGrid} ${toc.length === 0 ? styles.noToc : ""}`}>
           {toc.length > 0 ? <PostToc headings={toc} /> : null}

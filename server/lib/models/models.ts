@@ -98,6 +98,32 @@ export const ContactMessageModel: Model<ContactMessageDocument> =
   (mongoose.models.ContactMessage as Model<ContactMessageDocument> | undefined) ??
   mongoose.model<ContactMessageDocument>("ContactMessage", contactMessageSchema);
 
+export interface AdminCredentialDocument {
+  key: string;
+  email: string;
+  passwordHash: string;
+  sessionVersion: number;
+  resetTokenHash?: string | null;
+  resetExpiresAt?: Date | null;
+  updatedAt: Date;
+}
+
+const adminCredentialSchema = new Schema<AdminCredentialDocument>(
+  {
+    key: { type: String, required: true, unique: true },
+    email: { type: String, required: true },
+    passwordHash: { type: String, required: true },
+    sessionVersion: { type: Number, default: 0 },
+    resetTokenHash: { type: String },
+    resetExpiresAt: { type: Date },
+  },
+  { timestamps: { createdAt: false, updatedAt: true }, versionKey: false },
+);
+
+export const AdminCredentialModel: Model<AdminCredentialDocument> =
+  (mongoose.models.AdminCredential as Model<AdminCredentialDocument> | undefined) ??
+  mongoose.model<AdminCredentialDocument>("AdminCredential", adminCredentialSchema);
+
 export interface RateLimitDocument {
   key: string;
   count: number;

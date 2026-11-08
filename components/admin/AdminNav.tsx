@@ -10,6 +10,7 @@ const links = [
   { href: "/admin/", label: "Dashboard", icon: "grid", exact: true },
   { href: "/admin/posts/", label: "All posts", icon: "book", exact: false },
   { href: "/admin/posts/new/", label: "New post", icon: "pen", exact: true },
+  { href: "/admin/account/", label: "Account", icon: "user", exact: true },
 ];
 
 export function AdminNav({ email }: { email: string }) {

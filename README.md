@@ -75,12 +75,26 @@ npm run migrate
 ## Admin panel
 
 - `/admin/login` — email + password, rate-limited, httpOnly session cookie.
+- `/admin/account` — change the password (requires the current one). All other sessions are signed out.
+- `/admin/forgot-password` and `/admin/reset-password` — one-time email reset link, valid for 30 minutes.
 - `/admin` — counts and recently updated posts.
 - `/admin/posts` — search, status/category filters, pagination, publish/unpublish, delete (with confirmation).
 - `/admin/posts/new` and `/admin/posts/[id]/edit` — title, slug, summary, SEO description, Markdown body, cover image + alt text, categories, language, publish date, sources. Autosaves unsaved edits to `localStorage` and offers to restore them. Preview opens the real post renderer; publishing asks for confirmation.
 - `/admin/posts/[id]/preview` — private draft preview with a publish button.
 
 Admin routes are protected twice: `proxy.ts` blocks unauthenticated page requests, and every `/api/admin/*` handler verifies the session itself.
+
+### Password storage and reset
+
+`ADMIN_PASSWORD_HASH` is the initial password. The first in-app change or reset stores a bcrypt hash in MongoDB (`AdminCredential`), which then supersedes the env hash. Changing or resetting bumps a session version so every existing session is signed out. To fall back to `ADMIN_PASSWORD_HASH`, delete the `AdminCredential` document (key `admin`).
+
+Reset emails use `RESEND_API_KEY`; the sender defaults to `CONTACT_FROM_EMAIL` and the recipient to `ADMIN_EMAIL`:
+
+```
+PASSWORD_RESET_FROM_EMAIL=     # optional, defaults to CONTACT_FROM_EMAIL
+PASSWORD_RESET_TO_EMAIL=       # optional, defaults to ADMIN_EMAIL
+PASSWORD_RESET_BASE_URL=       # optional, defaults to NEXT_PUBLIC_SITE_URL
+```
 
 ## AI drafts
 

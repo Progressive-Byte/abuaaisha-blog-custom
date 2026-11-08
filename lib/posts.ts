@@ -1,7 +1,8 @@
 import { cache } from "react";
 import { connectDb } from "./db";
 import { PostModel } from "../server/lib/models/models";
-import type { Category } from "./post-schema";
+import { SLUG_PATTERN, type Category } from "./post-schema";
+import { usableImage } from "./post-image";
 import type { PostRecord } from "./types";
 
 type LeanPost = Record<string, unknown> & {
@@ -28,7 +29,7 @@ function toRecord(doc: LeanPost): PostRecord {
     lang: (doc.lang as PostRecord["lang"]) ?? "bn",
     status: (doc.status as PostRecord["status"]) ?? "published",
     publishedAt: new Date(doc.publishedAt),
-    image: doc.image as PostRecord["image"],
+    image: usableImage(doc.image as PostRecord["image"]),
     aiGenerated: doc.aiGenerated as boolean | undefined,
     sources: doc.sources as PostRecord["sources"],
     createdAt: new Date(doc.createdAt),
@@ -63,7 +64,7 @@ export const getPublishedPosts = cache(async (): Promise<PostRecord[]> => {
 });
 
 export const getPublishedPostBySlug = cache(async (slug: string): Promise<PostRecord | null> => {
-  if (!/^\d{3}[fsw]\d{2,}$/.test(slug)) return null;
+  if (!SLUG_PATTERN.test(slug)) return null;
   if (!hasDb()) return null;
   await connectDb();
   const doc = await PostModel.findOne({ ...publishedFilter(), slug }).lean<LeanPost | null>();

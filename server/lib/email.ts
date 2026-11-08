@@ -86,7 +86,7 @@ export async function sendContactEmail(contact: ContactEmail): Promise<"sent" | 
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;margin:0 auto;background:#ffffff;border-radius:12px;overflow:hidden;border:1px solid #e6e2d8;">
       <tr>
         <td style="background:#0f3d2e;padding:24px 28px;color:#ffffff;">
-          <div style="font-size:11px;letter-spacing:.12em;text-transform:uppercase;opacity:.75;">আবু আয়েশা · abuaaisha.com</div>
+          <div style="font-size:11px;letter-spacing:.12em;text-transform:uppercase;opacity:.75;">আবু আয়শা · abuaaisha.com</div>
           <div style="font-size:22px;font-weight:700;margin-top:8px;">${kind}</div>
           ${sessionName ? `<div style="font-size:15px;opacity:.9;margin-top:6px;">${escapeHtml(sessionName)}</div>` : ""}
         </td>
@@ -120,6 +120,73 @@ export async function sendContactEmail(contact: ContactEmail): Promise<"sent" | 
     to,
     replyTo: contact.email,
     subject: `[Abu Aaisha] ${contact.subject}`,
+    text,
+    html,
+  });
+
+  if (error) throw new Error(error.message);
+  return "sent";
+}
+
+export async function sendPasswordResetEmail({
+  to,
+  resetUrl,
+  minutes,
+}: {
+  to: string;
+  resetUrl: string;
+  minutes: number;
+}): Promise<"sent" | "stored"> {
+  const apiKey = process.env.RESEND_API_KEY;
+  const from = process.env.PASSWORD_RESET_FROM_EMAIL?.trim() || process.env.CONTACT_FROM_EMAIL;
+  if (!apiKey || !from) return "stored";
+
+  const text = [
+    "Reset your admin password",
+    "",
+    "Use the link below to choose a new password for the Abu Aaisha admin panel.",
+    resetUrl,
+    "",
+    `This link expires in ${minutes} minutes and can only be used once.`,
+    "If you did not ask for this, you can ignore this email — your password will not change.",
+  ].join("\n");
+
+  const html = `<!doctype html>
+<html lang="en">
+  <body style="margin:0;padding:24px;background:#f5f2ea;font-family:-apple-system,'Segoe UI',Roboto,Arial,sans-serif;color:#1f2933;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;margin:0 auto;background:#ffffff;border-radius:12px;overflow:hidden;border:1px solid #e6e2d8;">
+      <tr>
+        <td style="background:#0a1730;padding:24px 28px;color:#ffffff;">
+          <div style="font-size:11px;letter-spacing:.12em;text-transform:uppercase;opacity:.75;">Abu Aaisha · Admin</div>
+          <div style="font-size:22px;font-weight:700;margin-top:8px;">Reset your password</div>
+        </td>
+      </tr>
+      <tr>
+        <td style="padding:28px;">
+          <p style="margin:0;font-size:15px;line-height:1.7;color:#1f2933;">
+            Choose a new password for the admin panel using the button below.
+          </p>
+          <p style="margin:24px 0;">
+            <a href="${escapeHtml(resetUrl)}" style="display:inline-block;padding:12px 20px;border-radius:8px;background:#1b3a6b;color:#ffffff;font-size:15px;font-weight:600;text-decoration:none;">Set a new password</a>
+          </p>
+          <p style="margin:0;font-size:13px;line-height:1.7;color:#6b7280;">
+            This link expires in ${minutes} minutes and can only be used once. If you did not ask for this,
+            you can ignore this email — your password will not change.
+          </p>
+          <p style="margin:18px 0 0;font-size:12px;line-height:1.6;color:#6b7280;word-break:break-all;">
+            ${escapeHtml(resetUrl)}
+          </p>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>`;
+
+  const resend = new Resend(apiKey);
+  const { error } = await resend.emails.send({
+    from,
+    to,
+    subject: "[Abu Aaisha] Reset your admin password",
     text,
     html,
   });

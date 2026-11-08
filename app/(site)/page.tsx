@@ -49,11 +49,11 @@ export default async function HomePage() {
               প্রয়োজনে আন্তরিক পরামর্শ।
             </p>
             <div className={styles.actions}>
-              <Link className="btn btn--light" href="/counseling/#sessions">
-                লেখাগুলো পড়ুন
+              <Link className="btn btn--light" href="/counseling/?scroll=sessions">
+                কাউন্সেলিং <Icon name="arrow-right" />
               </Link>
               <Link className="btn btn--ghost-light" href="/posts/">
-                কাউন্সেলিং <Icon name="arrow-right" />
+                লেখাগুলো পড়ুন
               </Link>
             </div>
             <ul className={styles.contact}>
@@ -153,7 +153,7 @@ export default async function HomePage() {
               </span>
             </p>
             <div className={styles.actions}>
-              <Link className="btn btn--primary" href="/counseling/#sessions">
+              <Link className="btn btn--primary" href="/counseling/?scroll=sessions">
                 সেশন বুক করুন <Icon name="arrow-right" />
               </Link>
               <Link className="btn btn--outline" href="/counseling/">

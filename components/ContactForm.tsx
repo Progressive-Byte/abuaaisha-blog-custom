@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
+import toast from "react-hot-toast";
 import { Icon } from "./Icon";
 import { CONTACT_SUBJECTS } from "@/lib/site";
 import styles from "./ContactForm.module.css";
@@ -35,10 +36,18 @@ export function ContactForm({ idPrefix }: { idPrefix: string }) {
       if (!response.ok) throw new Error(body.error ?? "বার্তা পাঠানো যায়নি।");
       form.reset();
       setStatus("success");
-      setMessage("ধন্যবাদ! আপনার বার্তা পাঠানো হয়েছে। সাধারণত ২৪ ঘণ্টার মধ্যে উত্তর দেওয়া হয়।");
+      const successMessage =
+        "ধন্যবাদ! আপনার সেশন বুকিংয়ের অনুরোধটি সফলভাবে গ্রহণ করা হয়েছে। আমাদের টিম ২৪ ঘণ্টার মধ্যে আপনার সাথে যোগাযোগ করবে।";
+      setMessage(successMessage);
+      toast.success(successMessage);
     } catch (error) {
+      const reason =
+        error instanceof Error
+          ? error.message
+          : "দুঃখিত! আপনার সেশন বুকিংয়ের অনুরোধটি পাঠানো যায়নি। অনুগ্রহ করে আবার চেষ্টা করুন।";
       setStatus("error");
-      setMessage(error instanceof Error ? error.message : "বার্তা পাঠানো যায়নি।");
+      setMessage(reason);
+      toast.error(reason);
     }
   }
 

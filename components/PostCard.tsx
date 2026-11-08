@@ -19,7 +19,7 @@ export function PostCard({ post, headingLevel = 3, eager = false }: Props) {
 
   return (
     <article className={styles.card} lang={lang}>
-      <PostCover src={image?.url} alt={image?.alt} category={categories[0]} eager={eager} />
+      <PostCover src={image?.url} alt={image?.alt} eager={eager} />
       <div className={styles.body}>
         <div className={styles.metaTop}>
           <CategoryBadge category={categories[0]} />

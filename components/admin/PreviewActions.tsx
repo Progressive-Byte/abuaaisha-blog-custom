@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import toast from "react-hot-toast";
 import { Icon } from "@/components/Icon";
 import { api, ApiError } from "@/lib/api-client";
 import type { PostStatus } from "@/lib/admin-types";
@@ -19,9 +20,12 @@ export function PreviewActions({ id, status }: { id: string; status: PostStatus 
       await api(`/admin/posts/${id}/status`, { method: "POST", body: JSON.stringify({ status: "published" }) });
       setCurrent("published");
       setMessage("Published. The public cache will refresh shortly.");
+      toast.success("Post published.");
       router.refresh();
     } catch (err) {
-      setMessage(err instanceof ApiError ? err.message : "Publish failed");
+      const reason = err instanceof ApiError ? err.message : "Publish failed";
+      setMessage(reason);
+      toast.error(reason);
     } finally {
       setLoading(false);
     }

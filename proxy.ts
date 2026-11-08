@@ -5,7 +5,15 @@ import { SESSION_COOKIE, verifySession } from "@/lib/auth";
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  if (pathname === "/admin/login" || pathname === "/admin/login/") {
+  const publicPaths = new Set([
+    "/admin/login",
+    "/admin/login/",
+    "/admin/forgot-password",
+    "/admin/forgot-password/",
+    "/admin/reset-password",
+    "/admin/reset-password/",
+  ]);
+  if (publicPaths.has(pathname)) {
     return NextResponse.next();
   }
 

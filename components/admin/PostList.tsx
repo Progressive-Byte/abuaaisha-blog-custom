@@ -2,12 +2,15 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+import toast from "react-hot-toast";
 import { Icon } from "@/components/Icon";
+import { AdminBackLink } from "./AdminBackLink";
 import { ConfirmDialog } from "./ConfirmDialog";
 import { PostPreviewDialog } from "./PostPreviewDialog";
 import { api, ApiError } from "@/lib/api-client";
 import type { AdminPostSummary, PostsResponse } from "@/lib/admin-types";
 import { CATEGORY_META, CATEGORIES_LABEL } from "@/lib/admin-constants";
+import { SITE } from "@/lib/site";
 import { formatAdminDate } from "@/lib/format";
 
 const PER_PAGE = 10;
@@ -23,7 +26,6 @@ export function PostList() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [reload, setReload] = useState(0);
-  const [toast, setToast] = useState<{ text: string; error?: boolean } | null>(null);
   const [pendingDelete, setPendingDelete] = useState<AdminPostSummary | null>(null);
   const [pendingUnpublish, setPendingUnpublish] = useState<AdminPostSummary | null>(null);
   const [previewPost, setPreviewPost] = useState<AdminPostSummary | null>(null);
@@ -67,12 +69,6 @@ export function PostList() {
     };
   }, [params, reload]);
 
-  useEffect(() => {
-    if (!toast) return;
-    const timer = window.setTimeout(() => setToast(null), 3200);
-    return () => window.clearTimeout(timer);
-  }, [toast]);
-
   function clearFilters() {
     setQuery("");
     setStatus("");
@@ -85,9 +81,9 @@ export function PostList() {
     try {
       await api(`/admin/posts/${post.id}/status`, { method: "POST", body: JSON.stringify({ status: next }) });
       setPosts((current) => current.map((item) => (item.id === post.id ? { ...item, status: next } : item)));
-      setToast({ text: next === "published" ? "Post published." : "Post unpublished." });
+      toast.success(next === "published" ? "Post published." : "Post unpublished.");
     } catch (err) {
-      setToast({ text: err instanceof ApiError ? err.message : "Update failed", error: true });
+      toast.error(err instanceof ApiError ? err.message : "Update failed");
     } finally {
       setBusyId(null);
     }
@@ -117,12 +113,12 @@ export function PostList() {
     setDeleting(true);
     try {
       await api(`/admin/posts/${pendingDelete.id}`, { method: "DELETE" });
-      setToast({ text: "Post deleted." });
+      toast.success("Post deleted.");
       if (posts.length === 1 && page > 1) setPage(page - 1);
       else setReload((value) => value + 1);
       setPendingDelete(null);
     } catch (err) {
-      setToast({ text: err instanceof ApiError ? err.message : "Delete failed", error: true });
+      toast.error(err instanceof ApiError ? err.message : "Delete failed");
     } finally {
       setDeleting(false);
     }
@@ -135,6 +131,7 @@ export function PostList() {
     <div className="a-stack">
       <header className="a-page-head">
         <div>
+          <AdminBackLink href="/admin/" label="Back to dashboard" />
           <h1 className="a-title">All posts</h1>
           <p className="a-subtitle">
             {total} {total === 1 ? "post" : "posts"}
@@ -284,7 +281,8 @@ export function PostList() {
                           // eslint-disable-next-line @next/next/no-img-element
                           <img className="a-thumb" src={post.image.url} alt="" />
                         ) : (
-                          <div className="a-thumb" aria-hidden="true" />
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img className="a-thumb" src={SITE.postPlaceholder} alt="" />
                         )}
                         <div>
                           <Link href={`/admin/posts/${post.id}/edit/`}>{post.title}</Link>
@@ -407,17 +405,6 @@ export function PostList() {
         onConfirm={confirmUnpublish}
         onCancel={() => setPendingUnpublish(null)}
       />
-
-      {toast ? (
-        <div
-          className={`a-toast ${toast.error ? "a-toast-error" : ""}`}
-          role={toast.error ? "alert" : "status"}
-          aria-live={toast.error ? "assertive" : "polite"}
-        >
-          <Icon name={toast.error ? "alert-circle" : "check-circle"} size={18} />
-          {toast.text}
-        </div>
-      ) : null}
     </div>
   );
 }

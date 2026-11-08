@@ -70,7 +70,10 @@ Set these in Vercel → Project → Settings → Environment Variables (and in `
 | `MONGODB_URI` | yes | Atlas connection string |
 | `SESSION_SECRET` | yes | 32+ random characters; signs session JWTs |
 | `ADMIN_EMAIL` | yes | Admin login email |
-| `ADMIN_PASSWORD_HASH` | yes | bcrypt hash from `npm run hash-password` |
+| `ADMIN_PASSWORD_HASH` | yes | Initial bcrypt hash from `npm run hash-password` |
+| `PASSWORD_RESET_FROM_EMAIL` | no | Reset sender; defaults to `CONTACT_FROM_EMAIL` |
+| `PASSWORD_RESET_TO_EMAIL` | no | Reset recipient; defaults to `ADMIN_EMAIL` |
+| `PASSWORD_RESET_BASE_URL` | no | Public URL in reset links; defaults to `NEXT_PUBLIC_SITE_URL` |
 | `NEXT_PUBLIC_SITE_URL` | yes | `https://abuaaisha.com` — canonical URLs + revalidation |
 | `REVALIDATE_SECRET` | yes | Shared secret for the cache-refresh webhook |
 | `CLOUDINARY_CLOUD_NAME` | images | Cloudinary |
@@ -81,9 +84,11 @@ Set these in Vercel → Project → Settings → Environment Variables (and in `
 | `AI_MODEL` | no | Model override |
 | `AI_BASE_URL` | no | OpenAI-compatible base URL |
 | `AI_DAILY_LIMIT` | no | Default `10` |
-| `RESEND_API_KEY` | no | Contact email |
+| `RESEND_API_KEY` | no | Contact email + admin password reset |
 | `CONTACT_TO_EMAIL` | no | Inbox for contact messages |
-| `CONTACT_FROM_EMAIL` | no | Verified Resend sender |
+| `CONTACT_FROM_EMAIL` | no | Verified Resend sender (also default reset sender) |
+
+Password reset also needs `RESEND_API_KEY` and a sender; set `PASSWORD_RESET_TO_EMAIL` if the reset should go to a different inbox than `ADMIN_EMAIL`.
 
 Never commit `.env*` (only `.env.example` is tracked).
 

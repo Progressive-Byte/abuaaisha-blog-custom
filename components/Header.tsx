@@ -64,7 +64,7 @@ export function Header() {
                 <Icon name="mail" size={20} />
                 যোগাযোগ করুন
               </Link>
-              <Link className="btn btn--primary" href="/counseling/#sessions">
+              <Link className="btn btn--primary" href="/counseling/?scroll=sessions">
                 সেশন বুক করুন
                 <Icon name="arrow-right" />
               </Link>

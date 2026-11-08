@@ -4,6 +4,7 @@ import "@fontsource/anek-bangla/500.css";
 import "@fontsource/anek-bangla/600.css";
 import "@fontsource/anek-bangla/700.css";
 import "@/styles/globals.css";
+import { ToastProvider } from "@/components/ToastProvider";
 import { SITE, SITE_URL } from "@/lib/site";
 
 export const metadata: Metadata = {
@@ -44,7 +45,10 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="bn" data-scroll-behavior="smooth">
-      <body id="top">{children}</body>
+      <body id="top">
+        {children}
+        <ToastProvider />
+      </body>
     </html>
   );
 }

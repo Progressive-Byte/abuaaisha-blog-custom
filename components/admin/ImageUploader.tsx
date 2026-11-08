@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, type ChangeEvent } from "react";
+import toast from "react-hot-toast";
 import { Icon } from "@/components/Icon";
 import { api, ApiError } from "@/lib/api-client";
 import type { AdminPostImage } from "@/lib/admin-types";
@@ -73,8 +74,11 @@ export function ImageUploader({ value, onChange }: Props) {
       });
 
       onChange({ url: verified.url, publicId: verified.publicId, alt: value?.alt ?? "" });
+      toast.success("Cover image uploaded.");
     } catch (err) {
-      setError(err instanceof ApiError || err instanceof Error ? err.message : "Upload failed");
+      const message = err instanceof ApiError || err instanceof Error ? err.message : "Upload failed";
+      setError(message);
+      toast.error(message);
     } finally {
       setUploading(false);
     }
@@ -83,6 +87,7 @@ export function ImageUploader({ value, onChange }: Props) {
   async function remove() {
     const publicId = value?.publicId;
     onChange(null);
+    toast.success("Cover image removed.");
     if (publicId) {
       try {
         await api("/admin/uploads/delete", { method: "POST", body: JSON.stringify({ publicId }) });

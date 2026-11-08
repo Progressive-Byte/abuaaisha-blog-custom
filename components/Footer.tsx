@@ -15,7 +15,7 @@ export function Footer() {
           <div className={styles.brand}>
             <Logo tone="dark" />
             <p>{SITE.description}</p>
-            <Link className="btn btn--light" href="/counseling/#sessions">
+            <Link className="btn btn--light" href="/counseling/?scroll=sessions">
               সেশন বুক করুন
               <Icon name="arrow-right" />
             </Link>
@@ -44,20 +44,8 @@ export function Footer() {
                 <li>
                   <Link href="/contact/" data-contact-open="">
                     <Icon name="chat" size={20} />
-                    বার্তা পাঠান
+                    যোগাযোগ করুন
                   </Link>
-                </li>
-                <li>
-                  <a href={SITE.linkedin.url} rel="me noopener" target="_blank">
-                    <Icon name="linkedin" size={20} />
-                    লিংকডইন
-                  </a>
-                </li>
-                <li>
-                  <a href={SITE.youtube.url} rel="me noopener" target="_blank">
-                    <Icon name="youtube" size={20} />
-                    ইউটিউব
-                  </a>
                 </li>
               </ul>
             </div>

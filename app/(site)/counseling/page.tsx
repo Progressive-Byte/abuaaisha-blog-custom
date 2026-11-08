@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { Suspense } from "react";
 import { Icon } from "@/components/Icon";
+import { ScrollToSessions } from "@/components/ScrollToSessions";
 import { SITE } from "@/lib/site";
 import styles from "./counseling.module.css";
 
@@ -59,13 +61,14 @@ const steps = [
 const channels = [
   { icon: "mail", label: "ইমেইল", value: SITE.email, href: `mailto:${SITE.email}` },
   { icon: "chat", label: "কাউন্সেলিং", value: "সেশন বুক করুন", href: "/contact/", modal: true },
-  { icon: "linkedin", label: "লিংকডইন", value: SITE.linkedin.label, href: SITE.linkedin.url },
-  { icon: "youtube", label: "ইউটিউব", value: SITE.youtube.label, href: SITE.youtube.url },
 ];
 
 export default function CounselingPage() {
   return (
     <>
+      <Suspense fallback={null}>
+        <ScrollToSessions />
+      </Suspense>
       <section className={styles.hero} aria-labelledby="counseling-title">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img

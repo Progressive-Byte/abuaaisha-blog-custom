@@ -1,7 +1,8 @@
 import type { NextFunction, Request, Response } from "express";
 import bcrypt from "bcryptjs";
-import { SESSION_COOKIE, SESSION_TTL_SECONDS, signSession, verifySession } from "../../lib/auth";
+import { SESSION_COOKIE, SESSION_TTL_SECONDS, signSession, verifySession, type SessionPayload } from "../../lib/auth";
 import { HttpError } from "./http";
+import { getAdminSessionVersion, getEffectivePasswordHash } from "./admin";
 
 export interface AuthedRequest extends Request {
   adminEmail?: string;
@@ -20,9 +21,9 @@ function parseCookies(header: string | undefined): Record<string, string> {
   return result;
 }
 
-export async function validateCredentials(email: string, password: string): Promise<void> {
+export async function validateCredentials(email: string, password: string): Promise<number> {
   const expectedEmail = process.env.ADMIN_EMAIL;
-  const hash = process.env.ADMIN_PASSWORD_HASH;
+  const hash = await getEffectivePasswordHash();
   if (!expectedEmail || !hash) throw new HttpError(500, "Admin credentials are not configured");
 
   if (email.trim().toLowerCase() !== expectedEmail.trim().toLowerCase()) {
@@ -30,10 +31,11 @@ export async function validateCredentials(email: string, password: string): Prom
   }
   const ok = await bcrypt.compare(password, hash);
   if (!ok) throw new HttpError(401, "Invalid email or password");
+  return getAdminSessionVersion();
 }
 
-export async function issueSession(res: Response, email: string): Promise<void> {
-  const token = await signSession(email);
+export async function issueSession(res: Response, email: string, version: number): Promise<void> {
+  const token = await signSession(email, version);
   res.cookie(SESSION_COOKIE, token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
@@ -52,7 +54,7 @@ export function clearSession(res: Response): void {
   });
 }
 
-export async function currentSession(req: Request): Promise<{ email: string } | null> {
+export async function currentSession(req: Request): Promise<SessionPayload | null> {
   const token = parseCookies(req.headers.cookie)[SESSION_COOKIE];
   if (!token) return null;
   return verifySession(token);
@@ -63,6 +65,10 @@ export async function requireAuth(req: AuthedRequest, res: Response, next: NextF
     const session = await currentSession(req);
     if (!session) {
       res.status(401).json({ error: "Authentication required" });
+      return;
+    }
+    if (session.version !== (await getAdminSessionVersion())) {
+      res.status(401).json({ error: "Session expired. Please sign in again." });
       return;
     }
     req.adminEmail = session.email;

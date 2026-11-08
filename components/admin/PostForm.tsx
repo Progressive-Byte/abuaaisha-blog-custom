@@ -2,7 +2,9 @@
 
 import { useEffect, useRef, useState, type ChangeEvent } from "react";
 import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
 import { AiDraftDialog } from "./AiDraftDialog";
+import { AdminBackLink } from "./AdminBackLink";
 import { ConfirmDialog } from "./ConfirmDialog";
 import { ImageUploader } from "./ImageUploader";
 import { Icon } from "@/components/Icon";
@@ -77,7 +79,6 @@ export function PostForm({ mode, initial }: { mode: "new" | "edit"; initial?: Ad
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [issue, setIssue] = useState<FieldIssue | null>(null);
-  const [toast, setToast] = useState<{ text: string; error?: boolean } | null>(null);
   const [aiOpen, setAiOpen] = useState(false);
   const [pendingDraft, setPendingDraft] = useState<AiDraft | null>(null);
   const [publishOpen, setPublishOpen] = useState(false);
@@ -85,6 +86,8 @@ export function PostForm({ mode, initial }: { mode: "new" | "edit"; initial?: Ad
   const [status, setStatus] = useState<PostStatus>(initial?.status ?? "draft");
   const [slugAuto, setSlugAuto] = useState(!initial);
   const dirtyRef = useRef(false);
+  const headerRef = useRef<HTMLElement>(null);
+  const [headerFloating, setHeaderFloating] = useState(false);
 
   useEffect(() => {
     let timer: number | undefined;
@@ -127,10 +130,34 @@ export function PostForm({ mode, initial }: { mode: "new" | "edit"; initial?: Ad
   }, [form, storageKey]);
 
   useEffect(() => {
-    if (!toast) return;
-    const timer = window.setTimeout(() => setToast(null), 3500);
-    return () => window.clearTimeout(timer);
-  }, [toast]);
+    const element = headerRef.current;
+    if (!element) return;
+
+    let frame = 0;
+    const update = () => {
+      frame = 0;
+      const stickyTop = Number.parseFloat(window.getComputedStyle(element).top) || 0;
+      // The header's static document position does not change when its height
+      // collapses, so this threshold is stable and cannot feed back into itself.
+      const parent = element.offsetParent as HTMLElement | null;
+      const parentTop = parent ? parent.getBoundingClientRect().top + window.scrollY : 0;
+      const naturalTop = parentTop + element.offsetTop;
+      setHeaderFloating(window.scrollY + stickyTop >= naturalTop - 1);
+    };
+    const onScroll = () => {
+      if (frame) return;
+      frame = window.requestAnimationFrame(update);
+    };
+
+    frame = window.requestAnimationFrame(update);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    return () => {
+      if (frame) window.cancelAnimationFrame(frame);
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+    };
+  }, []);
 
   function update(patch: Partial<FormState>) {
     setForm((current) => ({ ...current, ...patch }));
@@ -168,7 +195,7 @@ export function PostForm({ mode, initial }: { mode: "new" | "edit"; initial?: Ad
     setSlugAuto(false);
     setDirty(true);
     dirtyRef.current = true;
-    setToast({ text: "Unsaved changes restored." });
+    toast.success("Unsaved changes restored.");
   }
 
   function discardSaved() {
@@ -248,7 +275,7 @@ export function PostForm({ mode, initial }: { mode: "new" | "edit"; initial?: Ad
       setStatus(data.post.status);
       setForm(fromPost(data.post));
 
-      if (!options.silent) setToast({ text: options.status === "published" ? "Post published." : "Draft saved." });
+      if (!options.silent) toast.success(options.status === "published" ? "Post published." : "Draft saved.");
       // Remember the new id so later saves (including after a silent preview) PATCH instead of POSTing again.
       if (!postId) {
         setPostId(data.post.id);
@@ -259,7 +286,7 @@ export function PostForm({ mode, initial }: { mode: "new" | "edit"; initial?: Ad
     } catch (err) {
       const message = err instanceof ApiError ? err.message : "Save failed";
       setError(message);
-      setToast({ text: message, error: true });
+      toast.error(message);
       return null;
     } finally {
       setSaving(false);
@@ -289,13 +316,17 @@ export function PostForm({ mode, initial }: { mode: "new" | "edit"; initial?: Ad
       aiGenerated: true,
       ...(slugAuto ? { slug: slugifyTitle(draft.title) } : {}),
     });
-    setToast({ text: "AI draft inserted. Review and edit before publishing." });
+    toast.success("AI draft inserted. Review and edit before publishing.");
   }
 
   return (
     <div className="a-stack">
-      <header className="a-page-head">
+      <header
+        ref={headerRef}
+        className={`a-page-head a-page-head--sticky ${headerFloating ? "is-floating" : ""}`}
+      >
         <div>
+          <AdminBackLink href="/admin/posts/" label="Back to all posts" />
           <h1 className="a-title">{mode === "new" ? "New post" : "Edit post"}</h1>
           <p className="a-subtitle">
             <span className={`a-status a-status-${status}`}>{status}</span>
@@ -659,17 +690,6 @@ export function PostForm({ mode, initial }: { mode: "new" | "edit"; initial?: Ad
         }}
         onCancel={() => setPendingDraft(null)}
       />
-
-      {toast ? (
-        <div
-          className={`a-toast ${toast.error ? "a-toast-error" : ""}`}
-          role={toast.error ? "alert" : "status"}
-          aria-live={toast.error ? "assertive" : "polite"}
-        >
-          <Icon name={toast.error ? "alert-circle" : "check-circle"} size={18} />
-          {toast.text}
-        </div>
-      ) : null}
     </div>
   );
 }

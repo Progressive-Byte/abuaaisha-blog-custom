@@ -11,7 +11,7 @@ export function CtaBand({ title, text }: { title: string; text: string }) {
           <h2 id="cta-title">{title}</h2>
           <p>{text}</p>
         </div>
-        <Link className="btn btn--light" href="/counseling/#sessions">
+        <Link className="btn btn--light" href="/counseling/?scroll=sessions">
           সেশন বুক করুন <Icon name="arrow-right" />
         </Link>
       </div>

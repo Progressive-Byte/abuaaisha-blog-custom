@@ -21,18 +21,26 @@ export function ContactModal() {
       const wanted = opener.dataset.subject;
       if (subject && wanted) subject.value = wanted;
       if (typeof dialog.showModal === "function") dialog.showModal();
+      document.documentElement.style.overflow = "hidden";
     };
 
     const onBackdrop = (event: MouseEvent) => {
       if (event.target === dialog) dialog.close();
     };
 
+    const onClose = () => {
+      document.documentElement.style.overflow = "";
+    };
+
     // Capture phase so preventDefault runs before Next's <Link> handler starts navigation.
     document.addEventListener("click", onClick, true);
     dialog.addEventListener("click", onBackdrop);
+    dialog.addEventListener("close", onClose);
     return () => {
       document.removeEventListener("click", onClick, true);
       dialog.removeEventListener("click", onBackdrop);
+      dialog.removeEventListener("close", onClose);
+      document.documentElement.style.overflow = "";
     };
   }, []);
 
@@ -51,22 +59,24 @@ export function ContactModal() {
         </button>
       </div>
 
-      <ContactForm idPrefix="modal" />
+      <div className={styles.scrollArea}>
+        <ContactForm idPrefix="modal" />
 
-      <div className={styles.or} role="separator">
-        <span>অথবা</span>
+        <div className={styles.or} role="separator">
+          <span>অথবা</span>
+        </div>
+
+        <a className={styles.direct} href={`mailto:${SITE.email}`}>
+          <span className={styles.directBadge}>
+            <Icon name="mail" size={20} />
+          </span>
+          <span className={styles.directText}>
+            <span>সরাসরি ইমেইল করুন</span>
+            <strong>{SITE.email}</strong>
+          </span>
+          <Icon name="arrow-up-right" size={22} />
+        </a>
       </div>
-
-      <a className={styles.direct} href={`mailto:${SITE.email}`}>
-        <span className={styles.directBadge}>
-          <Icon name="mail" size={20} />
-        </span>
-        <span className={styles.directText}>
-          <span>সরাসরি ইমেইল করুন</span>
-          <strong>{SITE.email}</strong>
-        </span>
-        <Icon name="arrow-up-right" size={22} />
-      </a>
     </dialog>
   );
 }

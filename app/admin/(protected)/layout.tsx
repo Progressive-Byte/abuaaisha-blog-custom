@@ -2,11 +2,12 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { AdminNav } from "@/components/admin/AdminNav";
 import { SESSION_COOKIE, verifySession } from "@/lib/auth";
+import { getAdminSessionVersion } from "@/server/lib/admin";
 
 export default async function ProtectedAdminLayout({ children }: { children: React.ReactNode }) {
   const store = await cookies();
   const session = await verifySession(store.get(SESSION_COOKIE)?.value);
-  if (!session) redirect("/admin/login/");
+  if (!session || session.version !== (await getAdminSessionVersion())) redirect("/admin/login/");
 
   return (
     <div className="a-shell">

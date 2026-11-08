@@ -44,7 +44,7 @@ export default async function AboutPage() {
             <p className={styles.role}>লেখক ও ইসলামিক কাউন্সেলর</p>
             <p className={styles.lede}>{page.description}</p>
             <div className={styles.actions}>
-              <Link className="btn btn--light" href="/counseling/#sessions">
+              <Link className="btn btn--light" href="/counseling/?scroll=sessions">
                 সেশন বুক করুন <Icon name="arrow-right" />
               </Link>
               <Link className="btn btn--ghost-light" href="/posts/">
@@ -53,7 +53,7 @@ export default async function AboutPage() {
             </div>
           </div>
           <div className={styles.archWrap}>
-            <ArchFrame src="/images/site/about-arch.webp" alt="সন্ধ্যার আলোয় পুরোনো বাড়ির সামনে মাঠে ফুটবল খেলছে শিশুরা" />
+            <ArchFrame src="/images/site/hero-desk.webp" alt="সন্ধ্যার আলোয় পুরোনো বাড়ির সামনে মাঠে ফুটবল খেলছে শিশুরা" />
           </div>
         </div>
       </section>
@@ -133,7 +133,7 @@ export default async function AboutPage() {
             <Icon name="chat" size={20} className={styles.ctaIcon} />
             <h2>পরামর্শ প্রয়োজন?</h2>
             <p>পারিবারিক বা ব্যক্তিগত বিষয়ে একান্তে কথা বলতে সেশন বুক করুন।</p>
-            <Link className="btn btn--light" href="/counseling/#sessions">
+            <Link className="btn btn--light" href="/counseling/?scroll=sessions">
               সেশন বুক করুন <Icon name="arrow-right" />
             </Link>
           </div>

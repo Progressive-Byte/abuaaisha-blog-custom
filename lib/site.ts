@@ -1,15 +1,14 @@
 import type { Category } from "./post-schema";
 
 export const SITE = {
-  name: "আবু আয়েশা",
+  name: "আবু আয়শা",
   nameEn: "Abu Aaisha",
   tagline: "ব্লগ ও ইসলামিক কাউন্সেলিং",
   description:
     "সমকালীন মুসলিম জীবন, পরিবার ও সমাজ নিয়ে লেখা এবং পারিবারিক ও ব্যক্তিগত বিষয়ে আন্তরিক পরামর্শ।",
   email: "chowdhury.mohammad.arif@gmail.com",
-  linkedin: { label: "/in/abuaaisha", url: "https://www.linkedin.com/in/abuaaisha" },
-  youtube: { label: "@abuaaisha", url: "https://www.youtube.com/@abuaaisha" },
   ogImage: "/images/site/hero-desk.webp",
+  postPlaceholder: "/images/site/post-placeholder.webp",
   postsPerPage: 12,
 } as const;
 
