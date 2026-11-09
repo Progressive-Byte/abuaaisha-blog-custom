@@ -1,0 +1,40 @@
+.frame {
+  position: relative;
+  display: block;
+  width: 100%;
+  overflow: hidden;
+  background-color: var(--color-paper-deep);
+  background-image: linear-gradient(100deg, transparent 20%, rgb(255 255 255 / 0.6) 50%, transparent 80%);
+  background-repeat: no-repeat;
+  background-size: 200% 100%;
+  background-position: 100% 0;
+  animation: cover-skeleton 1.4s ease-in-out infinite;
+}
+
+.loaded {
+  animation: none;
+  background-image: none;
+}
+
+.image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+@keyframes cover-skeleton {
+  from {
+    background-position: 100% 0;
+  }
+
+  to {
+    background-position: 0 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .frame {
+    animation: none;
+  }
+}

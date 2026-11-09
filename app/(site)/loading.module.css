@@ -1,0 +1,150 @@
+.page {
+  padding-bottom: var(--space-9);
+}
+
+.progress {
+  position: fixed;
+  top: 0;
+  right: 0;
+  left: 0;
+  z-index: 200;
+  height: 3px;
+  overflow: hidden;
+  background: rgb(184 145 74 / 0.18);
+  pointer-events: none;
+}
+
+.progress::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, var(--color-gold-400), transparent);
+  transform: translateX(-100%);
+  animation: loading-slide 1.1s ease-in-out infinite;
+}
+
+@keyframes loading-slide {
+  to {
+    transform: translateX(100%);
+  }
+}
+
+.shimmer {
+  display: block;
+  background-color: var(--color-paper-deep);
+  background-image: linear-gradient(100deg, transparent 20%, rgb(255 255 255 / 0.6) 50%, transparent 80%);
+  background-repeat: no-repeat;
+  background-size: 200% 100%;
+  background-position: 100% 0;
+  animation: loading-shimmer 1.4s ease-in-out infinite;
+}
+
+.intro {
+  padding-block: clamp(3rem, 2rem + 3vw, 5.5rem) var(--space-6);
+}
+
+.overline {
+  width: 7rem;
+  height: 0.75rem;
+  border-radius: 999px;
+}
+
+.title {
+  width: min(32rem, 90%);
+  height: clamp(2rem, 1.6rem + 2vw, 3.25rem);
+  margin-top: var(--space-4);
+  border-radius: var(--radius);
+}
+
+.lede {
+  width: min(40rem, 100%);
+  height: 1.1rem;
+  margin-top: var(--space-4);
+  border-radius: 999px;
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: var(--space-6);
+}
+
+.tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.pill {
+  width: 6.5rem;
+  height: 2.75rem;
+  border-radius: 999px;
+}
+
+.search {
+  width: min(20rem, 100%);
+  height: 2.75rem;
+  border-radius: var(--radius);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 19rem), 1fr));
+  gap: var(--space-6) var(--space-5);
+}
+
+.card {
+  overflow: hidden;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+}
+
+.media {
+  width: 100%;
+  aspect-ratio: 390 / 250;
+}
+
+.cardBody {
+  display: grid;
+  gap: var(--space-3);
+  padding: 1.25rem 1.5rem 1.5rem;
+}
+
+.line {
+  height: 0.85rem;
+  border-radius: 999px;
+}
+
+.lineTitle {
+  width: 92%;
+  height: 1.25rem;
+}
+
+.lineShort {
+  width: 58%;
+}
+
+@keyframes loading-shimmer {
+  from {
+    background-position: 100% 0;
+  }
+
+  to {
+    background-position: 0 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shimmer {
+    animation: none;
+  }
+
+  .progress::after {
+    animation: none;
+    opacity: 0.6;
+  }
+}

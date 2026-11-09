@@ -89,10 +89,9 @@
 
 .cover {
   width: 100%;
+  aspect-ratio: 1170 / 785;
   max-height: 40rem;
-  height: auto;
   border-radius: var(--radius-xl);
-  object-fit: cover;
 }
 
 .bodyGrid {

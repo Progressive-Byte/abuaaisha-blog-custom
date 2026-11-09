@@ -1,6 +1,6 @@
-import Image from "next/image";
 import Link from "next/link";
 import { CategoryBadge } from "./CategoryBadge";
+import { CoverImage } from "./CoverImage";
 import { CtaBand } from "./CtaBand";
 import { Icon } from "./Icon";
 import { PostCard } from "./PostCard";
@@ -79,14 +79,15 @@ export async function PostArticle({ post, newer, older, related, preview = false
         </header>
 
         <div className={`container ${styles.coverWrap}`}>
-          <Image
+          <CoverImage
             className={styles.cover}
-            src={post.image?.url ?? SITE.postPlaceholder}
-            alt={post.image?.alt ?? ""}
+            src={post.image?.url}
+            alt={post.image?.alt}
             width={1170}
             height={785}
             sizes="(min-width: 77.5rem) 1170px, 100vw"
-            priority
+            eager
+            fallbackSrc={SITE.postPlaceholder}
           />
         </div>
 

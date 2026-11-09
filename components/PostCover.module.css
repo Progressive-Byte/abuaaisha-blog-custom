@@ -1,7 +1,4 @@
 .cover {
   width: 100%;
-  height: auto;
   aspect-ratio: 390 / 250;
-  object-fit: cover;
-  background: var(--color-paper-deep);
 }

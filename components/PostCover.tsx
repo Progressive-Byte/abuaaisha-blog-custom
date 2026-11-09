@@ -1,4 +1,4 @@
-import Image from "next/image";
+import { CoverImage } from "./CoverImage";
 import { SITE } from "@/lib/site";
 import styles from "./PostCover.module.css";
 
@@ -18,15 +18,13 @@ export function PostCover({
   className,
 }: Props) {
   return (
-    <Image
-      className={`${styles.cover} ${className ?? ""}`}
-      src={src ?? SITE.postPlaceholder}
-      alt={src ? (alt ?? "") : ""}
-      width={1170}
-      height={785}
+    <CoverImage
+      src={src}
+      alt={alt}
       sizes={sizes}
-      loading={eager ? "eager" : "lazy"}
-      priority={eager}
+      eager={eager}
+      fallbackSrc={SITE.postPlaceholder}
+      className={`${styles.cover} ${className ?? ""}`}
     />
   );
 }
