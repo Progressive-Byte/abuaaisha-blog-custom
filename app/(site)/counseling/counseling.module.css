@@ -116,29 +116,6 @@
   font-size: var(--text-h4);
 }
 
-.price {
-  display: flex;
-  align-items: flex-end;
-  gap: var(--space-2);
-  padding-block: var(--space-2);
-  padding-bottom: var(--space-5);
-  border-bottom: 1px solid var(--color-line);
-}
-
-.price strong {
-  color: var(--color-ink-900);
-  font-size: clamp(2.5rem, 2rem + 1.5vw, 3.25rem);
-  font-weight: 600;
-  line-height: 1.28;
-  letter-spacing: -0.01em;
-}
-
-.price span {
-  padding-bottom: 0.5rem;
-  color: var(--color-ink-500);
-  font-size: var(--text-meta);
-}
-
 .session :global(.checklist) {
   flex: 1;
   align-content: start;
@@ -151,18 +128,12 @@
   color: var(--color-on-dark);
 }
 
-.featured h3,
-.featured .price strong {
+.featured h3 {
   color: var(--color-on-dark);
 }
 
-.featured :global(.meta-row),
-.featured .price span {
+.featured :global(.meta-row) {
   color: var(--color-on-dark-muted);
-}
-
-.featured .price {
-  border-bottom-color: rgb(255 255 255 / 0.18);
 }
 
 .featured :global(.checklist svg) {

@@ -27,7 +27,6 @@ const sessions = [
     name: "সংক্ষিপ্ত সেশন",
     mode: { icon: "video", label: "অনলাইন" },
     duration: "৩০ মিনিট",
-    price: "৳১,৫০০",
     features: ["একটি নির্দিষ্ট বিষয়ে পরামর্শ", "ভিডিও বা অডিও কলে"],
     subject: "সেশন বুকিং: সংক্ষিপ্ত সেশন",
     featured: false,
@@ -36,7 +35,6 @@ const sessions = [
     name: "পূর্ণাঙ্গ সেশন",
     mode: { icon: "video", label: "অনলাইন" },
     duration: "৬০ মিনিট",
-    price: "৳২,৫০০",
     features: ["বিস্তারিত আলোচনা", "দম্পতি একসাথে অংশ নিতে পারবেন"],
     subject: "সেশন বুকিং: পূর্ণাঙ্গ সেশন",
     featured: true,
@@ -45,7 +43,6 @@ const sessions = [
     name: "সরাসরি সাক্ষাৎ",
     mode: { icon: "map-pin", label: "সরাসরি" },
     duration: "৬০ মিনিট",
-    price: "৳৩,৫০০",
     features: ["মুখোমুখি আলোচনা", "পারিবারিক সেশনের সুযোগ"],
     subject: "সেশন বুকিং: সরাসরি সাক্ষাৎ",
     featured: false,
@@ -132,9 +129,6 @@ export default function CounselingPage() {
                     <Icon name="clock" size={20} />
                     {session.duration}
                   </span>
-                </p>
-                <p className={styles.price}>
-                  <strong>{session.price}</strong> <span>/ সেশন</span>
                 </p>
                 <ul className="checklist">
                   {session.features.map((feature) => (
