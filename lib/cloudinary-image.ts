@@ -1,5 +1,6 @@
 // trailingSlash is enabled in next.config.ts, so the canonical proxy URL includes the slash.
 export const IMAGE_PROXY_PATH = "/img/";
+export const IMAGE_PLACEHOLDER = "/images/site/post-placeholder.webp";
 
 const CLOUDINARY_HOST = "res.cloudinary.com";
 const UPLOAD_SEGMENT = "/image/upload/";
@@ -14,18 +15,44 @@ export function isAllowedWidth(width: number): boolean {
   return Number.isInteger(width) && IMAGE_WIDTHS.has(width);
 }
 
-/** Rewrites a Cloudinary delivery URL to the same-origin proxy; other sources pass through. */
-export function cloudinaryProxyUrl(src: string, width: number): string {
-  if (!src.includes(CLOUDINARY_HOST) || !src.includes(UPLOAD_SEGMENT)) return src;
-  return `${IMAGE_PROXY_PATH}?u=${encodeURIComponent(src)}&w=${width}`;
+/** Versioned asset path after /image/upload/, with any transformation segment removed. */
+function assetPathFrom(src: string): string | null {
+  let source: URL;
+  try {
+    source = new URL(src);
+  } catch {
+    return null;
+  }
+
+  if (source.protocol !== "https:" || source.hostname !== CLOUDINARY_HOST) return null;
+
+  const uploadIndex = source.pathname.indexOf(UPLOAD_SEGMENT);
+  if (uploadIndex === -1) return null;
+
+  const rest = source.pathname.slice(uploadIndex + UPLOAD_SEGMENT.length);
+  if (!rest) return null;
+
+  const [first, ...tail] = rest.split("/");
+  const path = /^v\d+$/.test(first) ? rest : tail.join("/");
+  return path || null;
 }
 
 /**
- * Validates a proxy request and rebuilds a deterministic Cloudinary URL.
- * Returns null for anything that is not an https image in the configured cloud.
+ * Rewrites a Cloudinary delivery URL to the same-origin proxy; other sources pass through.
+ * Only the asset path is sent to the browser, so no Cloudinary hostname appears in the URL.
  */
-export function resolveCloudinaryTarget(raw: string, width: number, cloud: string): URL | null {
-  if (!cloud || !isAllowedWidth(width)) return null;
+export function cloudinaryProxyUrl(src: string, width: number): string {
+  if (!src.includes(CLOUDINARY_HOST) || !src.includes(UPLOAD_SEGMENT)) return src;
+
+  const path = assetPathFrom(src);
+  if (!path) return IMAGE_PLACEHOLDER;
+
+  return `${IMAGE_PROXY_PATH}?p=${encodeURIComponent(path)}&w=${width}`;
+}
+
+/** Extracts the asset path from a legacy full-URL proxy request. */
+export function pathFromCloudinaryUrl(raw: string, cloud: string): string | null {
+  if (!cloud) return null;
 
   let source: URL;
   try {
@@ -41,12 +68,20 @@ export function resolveCloudinaryTarget(raw: string, width: number, cloud: strin
   if (!source.pathname.startsWith(prefix)) return null;
 
   const rest = source.pathname.slice(prefix.length);
+  if (!rest) return null;
+
   const [first, ...tail] = rest.split("/");
-  if (!first) return null;
+  return /^v\d+$/.test(first) ? rest : tail.join("/") || null;
+}
 
-  // Keep the version segment, replace any existing transformation segment.
-  const remainder = /^v\d+$/.test(first) ? rest : tail.join("/");
-  if (!remainder) return null;
+/** Builds a deterministic Cloudinary delivery URL from a validated asset path. */
+export function resolveCloudinaryTarget(path: string, width: number, cloud: string): URL | null {
+  if (!cloud || !isAllowedWidth(width)) return null;
+  if (!path || path.startsWith("/")) return null;
+  if (/[\\?#]/.test(path) || path.includes("//") || path.includes("..") || path.includes(":")) return null;
 
-  return new URL(`https://${CLOUDINARY_HOST}/${cloud}${UPLOAD_SEGMENT}f_webp,q_auto,w_${width}/${remainder}`);
+  const segments = path.split("/");
+  if (segments.some((segment) => !segment || segment === "." || segment === "..")) return null;
+
+  return new URL(`https://${CLOUDINARY_HOST}/${cloud}${UPLOAD_SEGMENT}f_webp,q_auto,w_${width}/${path}`);
 }

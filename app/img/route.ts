@@ -1,16 +1,20 @@
-import { isAllowedWidth, resolveCloudinaryTarget } from "@/lib/cloudinary-image";
+import {
+  IMAGE_PLACEHOLDER,
+  isAllowedWidth,
+  pathFromCloudinaryUrl,
+  resolveCloudinaryTarget,
+} from "@/lib/cloudinary-image";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-const PLACEHOLDER = "/images/site/post-placeholder.webp";
 const CACHE_CONTROL = "public, max-age=2592000, s-maxage=2592000, stale-while-revalidate=86400, immutable";
 
 function placeholderRedirect(request: Request): Response {
   return new Response(null, {
     status: 307,
     headers: {
-      Location: new URL(PLACEHOLDER, request.url).toString(),
+      Location: new URL(IMAGE_PLACEHOLDER, request.url).toString(),
       "Cache-Control": "no-store",
     },
   });
@@ -18,14 +22,19 @@ function placeholderRedirect(request: Request): Response {
 
 export async function GET(request: Request): Promise<Response> {
   const url = new URL(request.url);
-  const raw = url.searchParams.get("u");
   const width = Number(url.searchParams.get("w"));
+  const cloud = process.env.CLOUDINARY_CLOUD_NAME ?? "";
 
-  if (!raw || !isAllowedWidth(width)) {
+  if (!isAllowedWidth(width) || !cloud) {
     return new Response("Bad request", { status: 400 });
   }
 
-  const target = resolveCloudinaryTarget(raw, width, process.env.CLOUDINARY_CLOUD_NAME ?? "");
+  // `p` is the current asset-path form; `u` keeps pages cached before the switch working.
+  const direct = url.searchParams.get("p");
+  const legacy = url.searchParams.get("u");
+  const path = direct ?? (legacy ? pathFromCloudinaryUrl(legacy, cloud) : null);
+
+  const target = path ? resolveCloudinaryTarget(path, width, cloud) : null;
   if (!target) {
     return new Response("Forbidden", { status: 403 });
   }
