@@ -19,7 +19,11 @@ export function ContactModal() {
       event.preventDefault();
       const subject = dialog.querySelector<HTMLSelectElement>("[data-contact-subject]");
       const wanted = opener.dataset.subject;
-      if (subject && wanted) subject.value = wanted;
+      if (subject && wanted) {
+        subject.value = wanted;
+        // The select is controlled by React state, so notify it of the change.
+        subject.dispatchEvent(new Event("change", { bubbles: true }));
+      }
       if (typeof dialog.showModal === "function") dialog.showModal();
       document.documentElement.style.overflow = "hidden";
     };
@@ -60,7 +64,7 @@ export function ContactModal() {
       </div>
 
       <div className={styles.scrollArea}>
-        <ContactForm idPrefix="modal" />
+        <ContactForm idPrefix="modal" compact />
 
         <div className={styles.or} role="separator">
           <span>অথবা</span>

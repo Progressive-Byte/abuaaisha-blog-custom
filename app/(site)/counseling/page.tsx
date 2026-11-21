@@ -55,11 +55,6 @@ const steps = [
   { title: "সেবা নিন", text: "ভিডিও কল বা সাক্ষাতে" },
 ];
 
-const channels = [
-  { icon: "mail", label: "ইমেইল", value: SITE.email, href: `mailto:${SITE.email}` },
-  { icon: "chat", label: "কাউন্সেলিং", value: "সেশন বুক করুন", href: "/contact/", modal: true },
-];
-
 export default function CounselingPage() {
   return (
     <>
@@ -118,7 +113,7 @@ export default function CounselingPage() {
               <article className={`${styles.session} ${session.featured ? styles.featured : ""}`} key={session.name}>
                 <div className={styles.sessionTop}>
                   <h3>{session.name}</h3>
-                  {session.featured ? <span className={styles.popular}>জনপ্রিয়</span> : null}
+                  {session.featured ? <span className={styles.popular}>Popular</span> : null}
                 </div>
                 <p className="meta-row">
                   <span>
@@ -180,28 +175,20 @@ export default function CounselingPage() {
 
       <section className={styles.contactSection} aria-labelledby="contact-title">
         <div className="container">
-          <div className={styles.contactCard}>
-            <h2 id="contact-title">প্রশ্ন আছে? সরাসরি যোগাযোগ করুন</h2>
-            <ul className={styles.channels}>
-              {channels.map((channel) => (
-                <li key={channel.label}>
-                  <a
-                    href={channel.href}
-                    data-contact-open={channel.modal ? "" : undefined}
-                    target={channel.href.startsWith("https") ? "_blank" : undefined}
-                    rel={channel.href.startsWith("https") ? "me noopener" : undefined}
-                  >
-                    <span className={styles.chIcon}>
-                      <Icon name={channel.icon} size={20} />
-                    </span>
-                    <span className={styles.chText}>
-                      <small>{channel.label}</small>
-                      <strong>{channel.value}</strong>
-                    </span>
-                  </a>
-                </li>
-              ))}
-            </ul>
+          <div className={styles.contactStrip}>
+            <div className={styles.contactCopy}>
+              <h2 id="contact-title">প্রশ্ন আছে?</h2>
+              <p>সরাসরি যোগাযোগ করুন</p>
+            </div>
+            <div className={styles.contactActions}>
+              <a className={styles.contactLink} href={`mailto:${SITE.email}`}>
+                <Icon name="mail" size={20} />
+                {SITE.email}
+              </a>
+              <a className="btn btn--primary btn--sm" href={`mailto:${SITE.email}`}>
+                যোগাযোগ করুন
+              </a>
+            </div>
           </div>
         </div>
       </section>

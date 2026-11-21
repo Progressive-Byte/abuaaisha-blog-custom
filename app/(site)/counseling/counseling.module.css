@@ -231,73 +231,69 @@
   padding-bottom: var(--space-9);
 }
 
-.contactCard {
-  display: grid;
-  gap: 2.25rem;
-  padding: clamp(1.75rem, 1rem + 3vw, 4rem);
-  border-radius: var(--radius-2xl);
-  background: var(--color-band);
-}
-
-.contactCard h2 {
-  color: var(--color-on-dark);
-  font-size: var(--text-h2);
-  text-align: center;
-}
-
-.channels {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--space-4);
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.channels a {
+.contactStrip {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 0.875rem;
-  padding: 1.125rem 1.25rem 1.125rem 1.125rem;
-  border: 1px solid rgb(255 255 255 / 0.12);
-  border-radius: var(--radius-md);
-  background: rgb(255 255 255 / 0.07);
-  color: var(--color-on-dark);
-  text-decoration: none;
+  justify-content: space-between;
+  gap: var(--space-4) var(--space-6);
+  padding: var(--space-5) var(--space-6);
+  border: 1.5px solid var(--color-line);
+  border-radius: var(--radius-lg);
+  background: var(--color-paper-deep);
 }
 
-.channels a:hover {
-  background: rgb(255 255 255 / 0.12);
-}
-
-@media (max-width: 48rem) {
-  .channels {
-    grid-template-columns: 1fr;
-  }
-}
-
-.chIcon {
+.contactCopy {
   display: grid;
-  flex: none;
-  place-items: center;
-  width: 2.75rem;
-  height: 2.75rem;
-  border-radius: 999px;
-  background: rgb(255 255 255 / 0.12);
+  gap: var(--space-1);
 }
 
-.chText {
-  display: grid;
-  line-height: 1.5;
+.contactCopy h2 {
+  color: var(--color-ink-900);
+  font-size: var(--text-h4);
 }
 
-.chText small {
-  color: var(--color-on-dark-muted);
+.contactCopy p {
+  color: var(--color-ink-500);
   font-size: var(--text-meta);
 }
 
-.chText strong {
-  font-size: var(--text-ui);
-  font-weight: 600;
+.contactActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.contactLink {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--color-accent-700);
+  font-size: var(--text-small);
+  font-weight: 500;
+  text-decoration: none;
   overflow-wrap: anywhere;
+}
+
+.contactLink:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 48rem) {
+  .contactStrip {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: var(--space-5);
+  }
+
+  .contactActions {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-3);
+  }
+
+  .contactLink {
+    font-size: var(--text-label);
+  }
 }
