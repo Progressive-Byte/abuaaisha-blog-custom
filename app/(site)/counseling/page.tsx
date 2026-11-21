@@ -51,8 +51,8 @@ const sessions = [
 
 const steps = [
   { title: "সেশন বেছে নিন", text: "প্রয়োজন অনুযায়ী" },
-  { title: "সময় ও ফি নিশ্চিত করুন", text: "অনলাইনে পেমেন্ট" },
-  { title: "নির্ধারিত সময়ে কথা বলুন", text: "ভিডিও কল বা সাক্ষাতে" },
+  { title: "ফি নিশ্চিত করুন", text: "অনলাইনে পেমেন্ট" },
+  { title: "সেবা নিন", text: "ভিডিও কল বা সাক্ষাতে" },
 ];
 
 const channels = [
@@ -82,7 +82,7 @@ export default function CounselingPage() {
             ইসলামিক কাউন্সেলিং
           </span>
           <h1 id="counseling-title">পারিবারিক জীবনের জটিলতায় আন্তরিক পরামর্শ</h1>
-          <p>কোরআন-সুন্নাহর আলোকে, ধৈর্য নিয়ে আপনার কথা শোনা হবে।</p>
+          <p>কোরান-সুন্নাহর আলোকে আন্তরিক পরামর্শ </p>
           <a className="btn btn--light" href="#sessions">
             সেশন বুক করুন <Icon name="arrow-right" />
           </a>
