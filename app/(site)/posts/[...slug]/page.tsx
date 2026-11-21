@@ -14,6 +14,16 @@ export const dynamicParams = true;
 
 type Params = Promise<{ slug?: string[] }>;
 
+// Next.js re-encodes dynamic route params (e.g. Bengali slugs become %E0%A6…)
+// before passing them to the page, so decode back to the value stored in the DB.
+function decodeSlug(value: string): string {
+  try {
+    return decodeURIComponent(value);
+  } catch {
+    return value;
+  }
+}
+
 export async function generateStaticParams() {
   const posts = await getPublishedPosts().catch(() => []);
   const total = Math.max(1, Math.ceil(posts.length / SITE.postsPerPage));
@@ -30,7 +40,7 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
   const { slug = [] } = await params;
 
   if (slug.length === 1) {
-    const post = await getPublishedPostBySlug(slug[0]);
+    const post = await getPublishedPostBySlug(decodeSlug(slug[0]));
     if (post) {
       const image = post.image?.url ?? SITE.ogImage;
       return {
@@ -75,7 +85,7 @@ export default async function PostOrListingPage({ params }: { params: Params }) 
   const { slug = [] } = await params;
 
   if (slug.length === 1) {
-    const post = await getPublishedPostBySlug(slug[0]);
+    const post = await getPublishedPostBySlug(decodeSlug(slug[0]));
     if (post) {
       const posts = await getPublishedPosts();
       const index = posts.findIndex((item) => item.id === post.id);
